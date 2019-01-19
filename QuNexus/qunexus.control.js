@@ -9,13 +9,7 @@ host.defineController("Keith McMillen", "QuNexus", "0.1", "a535d5ee-82ac-429a-95
 
 host.defineMidiPorts(1, 1);
 
-if (host.platformIsWindows()) {
-   host.addDeviceNameBasedDiscoveryPair(["QuNexus"], ["QuNexus"]);
-} else if (host.platformIsMac()) {
-   host.addDeviceNameBasedDiscoveryPair(["QuNexus"], ["QuNexus"]);
-} else if (host.platformIsLinux()) {
-   host.addDeviceNameBasedDiscoveryPair(["QuNexus"], ["QuNexus"]);
-}
+host.addDeviceNameBasedDiscoveryPair(["QuNexus"], ["QuNexus"]);
 
 function init() {
    transport = host.createTransport();
