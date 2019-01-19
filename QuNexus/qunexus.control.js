@@ -28,7 +28,7 @@ function init() {
 }
 
 function onMidi0(status, data1, data2) {
-   printMidi(status, data1, data2)
+   //printMidi(status, data1, data2)
    if (isChannelController(status)) {
       if (data1 >= LOWEST_CC && data1 <= HIGHEST_CC) {
          var index = data1 - LOWEST_CC;
