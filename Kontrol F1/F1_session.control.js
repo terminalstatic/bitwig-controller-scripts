@@ -84,7 +84,7 @@ host.setShouldFailOnDeprecatedUse(true);
 
 host.defineController(
   "Native Instruments",
-  "Traktor Kontrol F1",
+  "Traktor Kontrol F1 Session",
   "0.1",
   "72c70fde-f37c-4935-a7bc-9b433c42d0d3",
   "terminal_static"

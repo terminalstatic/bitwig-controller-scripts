@@ -13,7 +13,6 @@ host.defineMidiPorts(1, 1);
 
 function init() {
 
-   println("Setting up omni only")
    noteIn = host.getMidiInPort(0).createNoteInput("", "??????");
    noteIn.setShouldConsumeEvents(false);
 
