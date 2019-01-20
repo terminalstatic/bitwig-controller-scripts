@@ -15,16 +15,16 @@ host.defineMidiPorts(1, 1);
 
 let velocity = 127
 let noteOffset = 0
-let noteArray = []
+let noteTable = []
 
 function init() {
 
     noteIn = host.getMidiInPort(0).createNoteInput("", "?9????");
     noteIn.setShouldConsumeEvents(false);
     noteIn.setVelocityTranslationTable(initArray(velocity, 128))
-    notesInit(noteArray)
+    notesInit(noteTable)
 
-    noteIn.setKeyTranslationTable(noteArray)
+    noteIn.setKeyTranslationTable(noteTable)
     host.getMidiInPort(0).setMidiCallback(onMidi0);
     userControls = host.createUserControls(HIGHEST_CC - LOWEST_CC + 1);
 
@@ -45,7 +45,6 @@ function onMidi0(status, data1, data2) {
             userControls.getControl(index).set(data2, 128);
         }*/
         if (data1 === VELOCITY_ROTARY) {
-            println(data2)
             if (data2 === 127) {
                 if (velocity > 0) {
                     velocity--;
@@ -61,18 +60,20 @@ function onMidi0(status, data1, data2) {
 
             }
         } else if (data1 === NOTE_OFFSET_ROTARY) {
-            //println(data2)
             if (data2 === 127) {
-                notesDiff(-1)
-                noteIn.setKeyTranslationTable(noteArray)
-                println(noteOffset)
-                sendMidi(CHANNEL_10, NOTE_OFFSET_ROTARY, Math.abs(noteOffset))
+                if (noteOffset > -36) {
+                    noteOffset--
+                    sendMidi(CHANNEL_10, NOTE_OFFSET_ROTARY, Math.abs(noteOffset))
+                    setNoteTable(noteIn, noteTable, noteOffset)
+                }
             } else if (data2 === 1) {
-                notesDiff(1)
-                noteIn.setKeyTranslationTable(noteArray)
-                println(noteOffset)
-                sendMidi(CHANNEL_10, NOTE_OFFSET_ROTARY, Math.abs(noteOffset))
+                if (noteOffset < 80) {
+                    noteOffset++
+                    sendMidi(CHANNEL_10, NOTE_OFFSET_ROTARY, Math.abs(noteOffset))
+                    setNoteTable(noteIn, noteTable, noteOffset)
+                }
             }
+
 
         }
     }
@@ -87,39 +88,18 @@ function exit() {
 
 }
 
-function notesInit(noteArray) {
+function notesInit(noteTable) {
     for (let i = 0; i < 128; i++) {
-        noteArray.push(i)
+        noteTable.push(i)
     }
 }
 
-
-function notesDiff(offset) {
-    if (offset < 0) {
-        if (noteArray[127] >= 92 || noteArray[127] === -1) {
-            for (let i = 0; i < 128; i++) {
-                if (noteArray[i] > 0 && noteArray[i] > -1) {
-                    noteArray[i] = noteArray[i] + offset
-                } else if (noteArray[i] === -1 && noteArray[i - 1] === 126) {
-                    noteArray[i] = 127
-                } else {
-                    noteArray[i] = -1
-                }
-            }
-            noteOffset--
-        }
-    } else if (offset > 0) {
-        if (noteArray[0] <= 79 || noteArray[0] === -1) {
-            for (let i = 0; i < 128; i++) {
-                if (noteArray[i] < 127 && noteArray[i] > -1) {
-                    noteArray[i] = noteArray[i] + offset
-                } else if (noteArray[i] === -1 && noteArray[i + 1] === 0) {
-                    noteArray[i] = 0
-                } else {
-                    noteArray[i] = -1
-                }
-            }
-            noteOffset++
+function setNoteTable(noteIn, table, offset) {
+    for (let i = 0; i < 128; i++) {
+        table[i] = offset + i;
+        if (table[i] < 0 || table[i] > 127) {
+            table[i] = -1;
         }
     }
+    noteIn.setKeyTranslationTable(table);
 }
