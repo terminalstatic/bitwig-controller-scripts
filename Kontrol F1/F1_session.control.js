@@ -244,404 +244,24 @@ function onMidi0(status, data1, data2) {
     printMidi(status, data1, data2);
     println(specialIsPressed)
     println(shiftSpecialIsPressed)
-    if (data1 >= SCENE_START_CC && data1 <= SCENE_END_CC && data2 > 0) {
-      if (specialIsPressed) {
-        println("pressed")
-        application.selectNone()
-        //trackBank.sceneBank().getItemAt(data1 - SCENE_START_CC).selectInEditor();
-        //trackBank.sceneBank().getItemAt(data1 - SCENE_START_CC).showInEditor();
-        trackBank.getItemAt(1).select();
 
-        application.remove()
-      } else {
-        //For future reference
-        //firstSceneOfBank = trackBank.sceneBank().getScene(0).sceneIndex().get()
-        //sceneIndex = trackBank.sceneBank().getScene(data1 - SCENE_START_CC).sceneIndex().get()
-        trackBank.sceneBank().launchScene(data1 - SCENE_START_CC);
-        lastScenePressed = data1 - SCENE_START_CC;
-      }
-    } else if (
-      data1 >= SCENE_START_CC_SHIFT &&
-      data1 <= SCENE_END_CC_SHIFT &&
-      data2 > 0
-    ) {
-      trackBank.sceneBank().launchScene(data1 - SCENE_START_CC_SHIFT);
-      lastScenePressed = data1 - SCENE_START_CC_SHIFT;
-    } else if (data1 >= CLIP_START_CC && data1 <= CLIP_END_CC && data2 > 0) {
-      let pnum = data1 - CLIP_START_CC;
-      if (specialIsPressed) {
-        trackBank
-          .getItemAt(parseInt(pnum / 4))
-          .clipLauncherSlotBank()
-          .duplicateClip(pnum % 4);
-      } else if (shiftSpecialIsPressed) {
-        trackBank
-          .getItemAt(parseInt(pnum / 4))
-          .clipLauncherSlotBank()
-          .deleteClip(pnum % 4);
-      } else if (clipRecordPressed) {
-        if (getClipFromTrackBank(pnum)
-          .isRecording()
-          .get() || getClipFromTrackBank(pnum)
-          .isRecordingQueued()
-          .get()) {
-          trackBank
-            .getItemAt(parseInt(pnum / 4))
-            .stop();
-        } else {
-          if (transport.isPlaying().get()) {
-            trackBank
-              .getItemAt(parseInt(pnum / 4))
-              .clipLauncherSlotBank()
-              .record(pnum % 4);
-          }
-        }
-      } else if (!getClipFromTrackBank(pnum)
-        .isPlaying()
-        .get())
-        getClipFromTrackBank(pnum)
-        .launch();
-      else
-        trackBank
-        .getItemAt(parseInt(pnum / 4))
-        .stop();
-      if (
-        trackBank
-        .getItemAt(parseInt(pnum / 4))
-        .isGroup()
-        .get()
-      ) {
-        lastScenePressed = pnum % 4;
-      }
-    } else if (
-      data1 >= CLIP_START_CC_SHIFT &&
-      data1 <= CLIP_END_CC_SHIFT &&
-      data2 > 0
-    ) {
-      let pnum = data1 - CLIP_START_CC_SHIFT;
-      if (specialIsPressed) {
-        trackBank
-          .getItemAt(parseInt(pnum / 4))
-          .clipLauncherSlotBank()
-          .duplicateClip(pnum % 4);
-      } else if (shiftSpecialIsPressed) {
-        trackBank
-          .getItemAt(parseInt(pnum / 4))
-          .clipLauncherSlotBank()
-          .deleteClip(pnum % 4);
-      } else if (clipRecordPressed) {
-        if (getClipFromTrackBank(pnum)
-          .isRecording()
-          .get() || getClipFromTrackBank(pnum)
-          .isRecordingQueued()
-          .get()) {
-          trackBank
-            .getItemAt(parseInt(pnum / 4))
-            .stop();
-        } else {
-          if (transport.isPlaying().get()) {
-            trackBank
-              .getItemAt(parseInt(pnum / 4))
-              .clipLauncherSlotBank()
-              .record(pnum % 4);
-          }
-        }
-      } else if (!getClipFromTrackBank(pnum)
-        .isPlaying()
-        .get())
-        getClipFromTrackBank(pnum)
-        .launch();
-      else
-        trackBank
-        .getItemAt(parseInt(pnum / 4))
-        .stop();
-      if (
-        trackBank
-        .getItemAt(parseInt(pnum / 4))
-        .isGroup()
-        .get()
-      ) {
-        lastScenePressed = pnum % 4;
-      }
-    } else if (data1 === PLAY_BUTTON) {
-      transport.play();
-    } else if (data1 === PLAY_RESET_BUTTON_SHIFT && data2 > 0) {
-      transport.setPosition(0);
-    } else if (data1 === ARRANGER_RECORD_BUTTON && data2 > 0) {
-      transport.record()
-    } else if (data1 === CLIP_RECORD_BUTTON) {
-      if (data2 > 0) {
-        clipRecordPressed = true
-        sendMidi(CC_CHANNEL_13, data1, ON)
-      } else {
-        clipRecordPressed = false
-        sendMidi(CC_CHANNEL_13, data1, OFF)
-      }
-    } else if (data1 === ARRANGER_AUTOMATION && data2 > 0) {
-      transport.toggleWriteArrangerAutomation()
-    } else if (data1 === CLIP_AUTOMATION_AND_OVERWRITE && data2 > 0) {
-      transport.toggleWriteClipLauncherAutomation()
-      transport.isClipLauncherOverdubEnabled().toggle();
-    } else if (
-      data1 === NEXT_TRACK_BUTTON &&
-      data2 > 0 && !specialIsPressed
-    ) {
-      cursorTrack.selectNext();
-      trackBank.scrollForwards();
-    } else if (
-      data1 === NEXT_TRACK_BUTTON &&
-      data2 > 0 && specialIsPressed
-    ) {
-      effectTrackBank.scrollForwards();
-    } else if (
-      data1 === PREV_TRACK_BUTTON &&
-      data2 > 0 && shiftSpecialIsPressed
-    ) {
-      effectTrackBank.scrollBackwards();
-    } else if (data1 === PREV_TRACK_BUTTON && data2 > 0 && !shiftSpecialIsPressed) {
-      cursorTrack.selectPrevious();
-      trackBank.scrollBackwards();
-    } else if (data1 === NEXT_SCENE_BUTTON && data2 > 0) {
-      trackBank.scrollScenesDown();
-    } else if (data1 === PREV_SCENE_BUTTON && data2 > 0) {
-      trackBank.scrollScenesUp();
-    } else if (data1 === UNDO_BUTTON && data2 > 0) {
-      application.undo();
-    } else if (data1 === UNDO_BUTTON_SHIFT && data2 > 0) {
-      application.redo();
-    } else if (data1 === VOLUME_SLIDER_MASTER) {
-      masterTrack.volume().set(data2, 128);
-    } else if (data1 === PAN_ROTARY_MASTER && !specialIsPressed) {
-      masterTrack.pan().set(data2, 128);
-    } else if (data1 >= VOLUME_SLIDERS_START && data1 <= VOLUME_SLIDERS_END) {
-      trackBank
-        .getItemAt(TRACKS_MAX_INDEX - (VOLUME_SLIDERS_END - data1))
-        .volume()
-        .set(data2, 128);
-    } else if (data1 >= VOLUME_SLIDERS_START_SHIFT && data1 <= VOLUME_SLIDERS_END_SHIFT) {
-      effectTrackBank
-        .getItemAt(EFFECTS_MAX_INDEX - (VOLUME_SLIDERS_END_SHIFT - data1))
-        .volume()
-        .set(data2, 128);
-    } else if (data1 >= PAN_ROTARY_START && data1 <= PAN_ROTARY_END && !specialIsPressed) {
-      trackBank
-        .getItemAt(TRACKS_MAX_INDEX - (PAN_ROTARY_END - data1))
-        .pan()
-        .set(data2, 128);
-    } else if (data1 >= PAN_ROTARY_START_SHIFT && data1 <= PAN_ROTARY_END_SHIFT && !shiftSpecialIsPressed) {
-      effectTrackBank
-        .getItemAt(EFFECTS_MAX_INDEX - (PAN_ROTARY_END_SHIFT - data1))
-        .pan()
-        .set(data2, 128);
-    } else if (data1 >= PAN_ROTARY_START && data1 <= PAN_ROTARY_END + 1 && specialIsPressed) {
-      println("send")
-      cursorTrack.sendBank().getItemAt(3 - (PAN_ROTARY_END + 1 - data1)).set(data2, 128);
+    if (handleTransport(status, data1, data2)) return;
 
-    } else if (data1 >= MUTE_AND_SOLO_START && data1 <= MUTE_AND_SOLO_END && specialIsPressed) {
-      trackBank.getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END - data1)).select()
-    } else if (data1 >= MUTE_AND_SOLO_START_SHIFT && data1 <= MUTE_AND_SOLO_END_SHIFT && shiftSpecialIsPressed) {
-      println("arm")
-      if (trackBank.getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END_SHIFT - data1)).arm().get())
-        trackBank.getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END_SHIFT - data1)).arm().set(false)
-      else
-        trackBank.getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END_SHIFT - data1)).arm().set(true)
-    } else if (data1 >= MUTE_AND_SOLO_START && data1 <= MUTE_AND_SOLO_END && !specialIsPressed) {
-      if (
-        trackBank
-        .getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END - data1))
-        .mute()
-        .get()
-      ) {
-        trackBank
-          .getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END - data1))
-          .mute()
-          .set(false);
-      } else {
-        trackBank
-          .getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END - data1))
-          .mute()
-          .set(true);
-      }
-    } else if (data1 === MUTE_AND_SOLO_MASTER && !specialIsPressed) {
-      if (masterTrack.mute().get()) {
-        masterTrack.mute().set(false);
-      } else {
-        masterTrack.mute().set(true);
-      }
-    } else if (data1 === MUTE_AND_SOLO_MASTER_SHIFT && !specialIsPressed) {
-      if (masterTrack.solo().get()) {
-        masterTrack.solo().set(false);
-      } else {
-        masterTrack.solo().set(true);
-      }
-    } else if (
-      data1 >= MUTE_AND_SOLO_START_SHIFT && data1 <= MUTE_AND_SOLO_END_SHIFT && !specialIsPressed) {
-      println("solo")
-      if (
-        trackBank
-        .getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END_SHIFT - data1))
-        .solo()
-        .get()
-      ) {
-        trackBank
-          .getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END_SHIFT - data1))
-          .solo()
-          .set(false);
-      } else {
-        trackBank
-          .getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END_SHIFT - data1))
-          .solo()
-          .set(true);
-      }
-    } else if (data1 === BROWSE_BUTTON && specialIsPressed && !popupBrowser.exists().get()) {
-      println("Insert")
-      cursorDevice.afterDeviceInsertionPoint().browse()
-      //deviceBrowser.startBrowsing();
-      //deviceBrowser.activateSession(deviceBrowser.getDeviceSession());
-    } else if (data1 === BROWSE_BUTTON && !specialIsPressed && !popupBrowser.exists().get()) {
-      //deviceBrowser.startBrowsing();
-      //deviceBrowser.activateSession(deviceBrowser.getDeviceSession());
-      cursorDevice.createDeviceBrowser(1, 1).startBrowsing()
-    } else if (data1 === BROWSE_BUTTON && popupBrowser.exists().get()) {
-      popupBrowser.cancel();
-    } else if (data1 === PUSH_ROTARY && popupBrowser.exists().get()) {
-      if (data2 === 1) {
-        if (
-          !lastSelectedBrowserColumn ||
-          lastSelectedBrowserColumn === 0 ||
-          lastSelectedBrowserColumn > 7
-        ) {
-          //popupBrowser.selectNextFile();
-          popupBrowser
-            .resultsColumn()
-            .createCursorItem()
-            .selectNext();
-          lastSelectedBrowserColumn = 0;
-        } else if (lastSelectedBrowserColumn === 1)
-          popupBrowser
-          .smartCollectionColumn()
-          .createCursorItem()
-          .selectNext();
-        else if (lastSelectedBrowserColumn === 2)
-          popupBrowser
-          .locationColumn()
-          .createCursorItem()
-          .selectNext();
-        else if (lastSelectedBrowserColumn === 3)
-          popupBrowser
-          .categoryColumn()
-          .createCursorItem()
-          .selectNext();
-        else if (lastSelectedBrowserColumn === 4)
-          popupBrowser
-          .creatorColumn()
-          .createCursorItem()
-          .selectNext();
-        else if (lastSelectedBrowserColumn === 5)
-          popupBrowser
-          .deviceTypeColumn()
-          .createCursorItem()
-          .selectNext();
-        else if (lastSelectedBrowserColumn === 6)
-          popupBrowser
-          .fileTypeColumn()
-          .createCursorItem()
-          .selectNext();
-        else if (lastSelectedBrowserColumn === 7) {
-          popupBrowser
-            .selectedContentTypeIndex()
-            .set(
-              popupBrowser.selectedContentTypeIndex().get() < 4 ?
-              popupBrowser.selectedContentTypeIndex().get() + 1 :
-              0
-            );
-        }
-      } else {
-        if (
-          !lastSelectedBrowserColumn ||
-          lastSelectedBrowserColumn === 0 ||
-          lastSelectedBrowserColumn > 7
-        ) {
-          //popupBrowser.selectPreviousFile();
-          popupBrowser
-            .resultsColumn()
-            .createCursorItem()
-            .selectPrevious();
-          lastSelectedBrowserColumn = 0;
-        } else if (lastSelectedBrowserColumn === 1)
-          popupBrowser
-          .smartCollectionColumn()
-          .createCursorItem()
-          .selectPrevious();
-        else if (lastSelectedBrowserColumn === 2)
-          popupBrowser
-          .locationColumn()
-          .createCursorItem()
-          .selectPrevious();
-        else if (lastSelectedBrowserColumn === 3)
-          popupBrowser
-          .categoryColumn()
-          .createCursorItem()
-          .selectPrevious();
-        else if (lastSelectedBrowserColumn === 4)
-          popupBrowser
-          .creatorColumn()
-          .createCursorItem()
-          .selectPrevious();
-        else if (lastSelectedBrowserColumn === 5)
-          popupBrowser
-          .deviceTypeColumn()
-          .createCursorItem()
-          .selectPrevious();
-        else if (lastSelectedBrowserColumn === 6)
-          popupBrowser
-          .fileTypeColumn()
-          .createCursorItem()
-          .selectPrevious();
-        else if (lastSelectedBrowserColumn === 7) {
-          popupBrowser
-            .selectedContentTypeIndex()
-            .set(
-              popupBrowser.selectedContentTypeIndex().get() > 0 ?
-              popupBrowser.selectedContentTypeIndex().get() - 1 :
-              4
-            );
-        }
-      }
-    } else if (data1 === PUSH_ROTARY_SHIFT && popupBrowser.exists().get()) {
-      if (data2 === 1) {
-        if (lastSelectedBrowserColumn === undefined)
-          lastSelectedBrowserColumn = 1
-        else
-          lastSelectedBrowserColumn = lastSelectedBrowserColumn < 7 ? lastSelectedBrowserColumn + 1 : 0
-      } else {
-        lastSelectedBrowserColumn = lastSelectedBrowserColumn > 0 ? lastSelectedBrowserColumn - 1 : 7
-      }
-      sendMidi(
-        CC_CHANNEL_13,
-        PUSH_ROTARY_SHIFT,
-        lastSelectedBrowserColumn === undefined ? 0 : lastSelectedBrowserColumn
-      );
+    if (handleScene(status, data1, data1)) return;
 
-      sendMidi(
-        CC_CHANNEL_13,
-        PUSH_ROTARY,
-        lastSelectedBrowserColumn === undefined ? 0 : lastSelectedBrowserColumn
-      );
+    if (handleClips(status, data1, data2)) return;
 
-    } else if (data1 === PUSH_ROTARY_PUSH && data2 > 0 && popupBrowser.exists().get()) {
-      popupBrowser.commit();
-    } else if (
-      data1 === PUSH_ROTARY_PUSH_SHIFT &&
-      popupBrowser.exists().get()
-    ) {
-      popupBrowser.cancel();
-    } else if (data1 === 31) {}
+    if (handleNav(status, data1, data2)) return;
+
+    if (handleApplication(status, data1, data2)) return;
+
+    if (handleChannels(status, data1, data2)) return;
+
+    if (handleBrowser(status, data1, data2)) return;
   }
 }
 
 function flush() {
-  println("flush")
   sendMidi(
     CC_CHANNEL_13,
     PUSH_ROTARY_SHIFT,
@@ -711,14 +331,14 @@ function flush() {
 
     setPadColor(
       SCENE_START_CC + i,
-      cs.h * 127,
-      cs.s * 127,
+      cs.h,
+      cs.s,
       (cs.v = sceneBrightness)
     );
     setPadColor(
       SCENE_START_CC_SHIFT + i,
-      cs.h * 127,
-      cs.s * 127,
+      cs.h,
+      cs.s,
       (cs.v = sceneBrightness)
     );
   }
@@ -767,14 +387,14 @@ function flush() {
         //setPadColor(CLIP_START_CC + i, cclip.h * 127, cclip.s * 127, cclip.v * 127);
         setPadColor(
           CLIP_START_CC + i,
-          cclip.h * 127,
-          cclip.s * 127,
+          cclip.h,
+          cclip.s,
           cclip.v !== 0 ? brightness : 0
         );
         setPadColor(
           CLIP_START_CC_SHIFT + i,
-          cclip.h * 127,
-          cclip.s * 127,
+          cclip.h,
+          cclip.s,
           cclip.v !== 0 ? brightness : 0
         );
       }
@@ -848,6 +468,432 @@ function exit() {
   }
 }
 
+function handleTransport(status, data1, data2) {
+  if (data1 === PLAY_BUTTON) {
+    transport.play();
+    return true;
+  } else if (data1 === PLAY_RESET_BUTTON_SHIFT && data2 > 0) {
+    transport.setPosition(0);
+    return true;
+  } else if (data1 === ARRANGER_RECORD_BUTTON && data2 > 0) {
+    transport.record()
+    return true;
+  } else if (data1 === ARRANGER_AUTOMATION && data2 > 0) {
+    transport.toggleWriteArrangerAutomation()
+    return true;
+  } else if (data1 === CLIP_AUTOMATION_AND_OVERWRITE && data2 > 0) {
+    transport.toggleWriteClipLauncherAutomation()
+    transport.isClipLauncherOverdubEnabled().toggle();
+    return true;
+  }
+  return false;
+}
+
+function handleScene(status, data1, data2) {
+  if (data1 >= SCENE_START_CC && data1 <= SCENE_END_CC && data2 > 0) {
+    //For future reference
+    //firstSceneOfBank = trackBank.sceneBank().getScene(0).sceneIndex().get()
+    //sceneIndex = trackBank.sceneBank().getScene(data1 - SCENE_START_CC).sceneIndex().get()
+    trackBank.sceneBank().launchScene(data1 - SCENE_START_CC);
+    lastScenePressed = data1 - SCENE_START_CC;
+    return true;
+  } else if (
+    data1 >= SCENE_START_CC_SHIFT &&
+    data1 <= SCENE_END_CC_SHIFT &&
+    data2 > 0
+  ) {
+    trackBank.sceneBank().launchScene(data1 - SCENE_START_CC_SHIFT);
+    lastScenePressed = data1 - SCENE_START_CC_SHIFT;
+    return true;
+  }
+  return false;
+}
+
+function handleClips(status, data1, data1) {
+  if (data1 >= CLIP_START_CC && data1 <= CLIP_END_CC && data2 > 0) {
+    let pnum = data1 - CLIP_START_CC;
+    if (specialIsPressed) {
+      trackBank
+        .getItemAt(parseInt(pnum / 4))
+        .clipLauncherSlotBank()
+        .duplicateClip(pnum % 4);
+    } else if (shiftSpecialIsPressed) {
+      trackBank
+        .getItemAt(parseInt(pnum / 4))
+        .clipLauncherSlotBank()
+        .deleteClip(pnum % 4);
+    } else if (clipRecordPressed) {
+      if (getClipFromTrackBank(pnum)
+        .isRecording()
+        .get() || getClipFromTrackBank(pnum)
+        .isRecordingQueued()
+        .get()) {
+        trackBank
+          .getItemAt(parseInt(pnum / 4))
+          .stop();
+      } else {
+        if (transport.isPlaying().get()) {
+          trackBank
+            .getItemAt(parseInt(pnum / 4))
+            .clipLauncherSlotBank()
+            .record(pnum % 4);
+        }
+      }
+    } else if (!getClipFromTrackBank(pnum)
+      .isPlaying()
+      .get())
+      getClipFromTrackBank(pnum)
+      .launch();
+    else
+      trackBank
+      .getItemAt(parseInt(pnum / 4))
+      .stop();
+    if (
+      trackBank
+      .getItemAt(parseInt(pnum / 4))
+      .isGroup()
+      .get()
+    ) {
+      lastScenePressed = pnum % 4;
+    }
+    return true;
+  } else if (data1 >= CLIP_START_CC_SHIFT && data1 <= CLIP_END_CC_SHIFT && data2 > 0) {
+    let pnum = data1 - CLIP_START_CC_SHIFT;
+    if (specialIsPressed) {
+      trackBank
+        .getItemAt(parseInt(pnum / 4))
+        .clipLauncherSlotBank()
+        .duplicateClip(pnum % 4);
+    } else if (shiftSpecialIsPressed) {
+      trackBank
+        .getItemAt(parseInt(pnum / 4))
+        .clipLauncherSlotBank()
+        .deleteClip(pnum % 4);
+    } else if (clipRecordPressed) {
+      if (getClipFromTrackBank(pnum)
+        .isRecording()
+        .get() || getClipFromTrackBank(pnum)
+        .isRecordingQueued()
+        .get()) {
+        trackBank
+          .getItemAt(parseInt(pnum / 4))
+          .stop();
+      } else {
+        if (transport.isPlaying().get()) {
+          trackBank
+            .getItemAt(parseInt(pnum / 4))
+            .clipLauncherSlotBank()
+            .record(pnum % 4);
+        }
+      }
+    } else if (!getClipFromTrackBank(pnum)
+      .isPlaying()
+      .get())
+      getClipFromTrackBank(pnum)
+      .launch();
+    else
+      trackBank
+      .getItemAt(parseInt(pnum / 4))
+      .stop();
+    if (
+      trackBank
+      .getItemAt(parseInt(pnum / 4))
+      .isGroup()
+      .get()
+    ) {
+      lastScenePressed = pnum % 4;
+    }
+    return true;
+  } else if (data1 === CLIP_RECORD_BUTTON) {
+    if (data2 > 0) {
+      clipRecordPressed = true
+      sendMidi(CC_CHANNEL_13, data1, ON)
+    } else {
+      clipRecordPressed = false
+      sendMidi(CC_CHANNEL_13, data1, OFF)
+    }
+    return true;
+  }
+  return false;
+}
+
+function handleNav(status, data1, data2) {
+  if (data1 === NEXT_TRACK_BUTTON && data2 > 0 && !specialIsPressed) {
+    cursorTrack.selectNext();
+    trackBank.scrollForwards();
+    return true;
+  } else if (data1 === NEXT_TRACK_BUTTON && data2 > 0 && specialIsPressed) {
+    effectTrackBank.scrollForwards();
+    return true;
+  } else if (data1 === PREV_TRACK_BUTTON && data2 > 0 && shiftSpecialIsPressed) {
+    effectTrackBank.scrollBackwards();
+    return true;
+  } else if (data1 === PREV_TRACK_BUTTON && data2 > 0 && !shiftSpecialIsPressed) {
+    cursorTrack.selectPrevious();
+    trackBank.scrollBackwards();
+    return true;
+  } else if (data1 === NEXT_SCENE_BUTTON && data2 > 0) {
+    trackBank.scrollScenesDown();
+    return true;
+  } else if (data1 === PREV_SCENE_BUTTON && data2 > 0) {
+    trackBank.scrollScenesUp();
+    return true;
+  }
+  return false;
+}
+
+function handleApplication(status, data1, data2) {
+  if (data1 === UNDO_BUTTON && data2 > 0) {
+    application.undo();
+    return true;
+  } else if (data1 === UNDO_BUTTON_SHIFT && data2 > 0) {
+    application.redo();
+    return true;
+  }
+  return false;
+}
+
+function handleChannels(status, data1, data2) {
+  if (data1 === VOLUME_SLIDER_MASTER) {
+    masterTrack.volume().set(data2, 128);
+    return true;
+  } else if (data1 === PAN_ROTARY_MASTER && !specialIsPressed) {
+    masterTrack.pan().set(data2, 128);
+    return true;
+  } else if (data1 >= VOLUME_SLIDERS_START && data1 <= VOLUME_SLIDERS_END) {
+    trackBank
+      .getItemAt(TRACKS_MAX_INDEX - (VOLUME_SLIDERS_END - data1))
+      .volume()
+      .set(data2, 128);
+    return true;
+  } else if (data1 >= VOLUME_SLIDERS_START_SHIFT && data1 <= VOLUME_SLIDERS_END_SHIFT) {
+    effectTrackBank
+      .getItemAt(EFFECTS_MAX_INDEX - (VOLUME_SLIDERS_END_SHIFT - data1))
+      .volume()
+      .set(data2, 128);
+    return true;
+  } else if (data1 >= PAN_ROTARY_START && data1 <= PAN_ROTARY_END && !specialIsPressed) {
+    trackBank
+      .getItemAt(TRACKS_MAX_INDEX - (PAN_ROTARY_END - data1))
+      .pan()
+      .set(data2, 128);
+    return true;
+  } else if (data1 >= PAN_ROTARY_START_SHIFT && data1 <= PAN_ROTARY_END_SHIFT && !shiftSpecialIsPressed) {
+    effectTrackBank
+      .getItemAt(EFFECTS_MAX_INDEX - (PAN_ROTARY_END_SHIFT - data1))
+      .pan()
+      .set(data2, 128);
+    return true;
+  } else if (data1 >= PAN_ROTARY_START && data1 <= PAN_ROTARY_END + 1 && specialIsPressed) {
+    println("send")
+    cursorTrack.sendBank().getItemAt(3 - (PAN_ROTARY_END + 1 - data1)).set(data2, 128);
+    return true;
+  } else if (data1 >= MUTE_AND_SOLO_START && data1 <= MUTE_AND_SOLO_END && specialIsPressed) {
+    trackBank.getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END - data1)).select()
+    return true;
+  } else if (data1 >= MUTE_AND_SOLO_START_SHIFT && data1 <= MUTE_AND_SOLO_END_SHIFT && shiftSpecialIsPressed) {
+    if (trackBank.getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END_SHIFT - data1)).arm().get())
+      trackBank.getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END_SHIFT - data1)).arm().set(false)
+    else
+      trackBank.getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END_SHIFT - data1)).arm().set(true)
+    return true;
+  } else if (data1 >= MUTE_AND_SOLO_START && data1 <= MUTE_AND_SOLO_END && !specialIsPressed) {
+    if (
+      trackBank
+      .getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END - data1))
+      .mute()
+      .get()
+    ) {
+      trackBank
+        .getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END - data1))
+        .mute()
+        .set(false);
+    } else {
+      trackBank
+        .getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END - data1))
+        .mute()
+        .set(true);
+    }
+    return true;
+  } else if (data1 === MUTE_AND_SOLO_MASTER && !specialIsPressed) {
+    if (masterTrack.mute().get()) {
+      masterTrack.mute().set(false);
+    } else {
+      masterTrack.mute().set(true);
+    }
+    return true;
+  } else if (data1 === MUTE_AND_SOLO_MASTER_SHIFT && !specialIsPressed) {
+    if (masterTrack.solo().get()) {
+      masterTrack.solo().set(false);
+    } else {
+      masterTrack.solo().set(true);
+    }
+    return true;
+  } else if (
+    data1 >= MUTE_AND_SOLO_START_SHIFT && data1 <= MUTE_AND_SOLO_END_SHIFT && !specialIsPressed) {
+    println("solo")
+    if (
+      trackBank
+      .getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END_SHIFT - data1))
+      .solo()
+      .get()
+    ) {
+      trackBank
+        .getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END_SHIFT - data1))
+        .solo()
+        .set(false);
+    } else {
+      trackBank
+        .getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END_SHIFT - data1))
+        .solo()
+        .set(true);
+    }
+    return true;
+  }
+  return false;
+}
+
+function handleBrowser(status, data1, data2) {
+  if (data1 === BROWSE_BUTTON && specialIsPressed && !popupBrowser.exists().get()) {
+    println("Insert")
+    cursorDevice.afterDeviceInsertionPoint().browse()
+    //deviceBrowser.startBrowsing();
+    //deviceBrowser.activateSession(deviceBrowser.getDeviceSession());
+    return true;
+  } else if (data1 === BROWSE_BUTTON && !specialIsPressed && !popupBrowser.exists().get()) {
+    //deviceBrowser.startBrowsing();
+    //deviceBrowser.activateSession(deviceBrowser.getDeviceSession());
+    cursorDevice.createDeviceBrowser(1, 1).startBrowsing()
+    return true;
+  } else if (data1 === BROWSE_BUTTON && popupBrowser.exists().get()) {
+    popupBrowser.cancel();
+    return true;
+  } else if (data1 === PUSH_ROTARY && popupBrowser.exists().get()) {
+    if (data2 === 1) {
+      if (!lastSelectedBrowserColumn || lastSelectedBrowserColumn === 0 || lastSelectedBrowserColumn > 7) {
+        //popupBrowser.selectNextFile();
+        popupBrowser
+          .resultsColumn()
+          .createCursorItem()
+          .selectNext();
+        lastSelectedBrowserColumn = 0;
+      } else if (lastSelectedBrowserColumn === 1)
+        popupBrowser
+        .smartCollectionColumn()
+        .createCursorItem()
+        .selectNext();
+      else if (lastSelectedBrowserColumn === 2)
+        popupBrowser
+        .locationColumn()
+        .createCursorItem()
+        .selectNext();
+      else if (lastSelectedBrowserColumn === 3)
+        popupBrowser
+        .categoryColumn()
+        .createCursorItem()
+        .selectNext();
+      else if (lastSelectedBrowserColumn === 4)
+        popupBrowser
+        .creatorColumn()
+        .createCursorItem()
+        .selectNext();
+      else if (lastSelectedBrowserColumn === 5)
+        popupBrowser
+        .deviceTypeColumn()
+        .createCursorItem()
+        .selectNext();
+      else if (lastSelectedBrowserColumn === 6)
+        popupBrowser
+        .fileTypeColumn()
+        .createCursorItem()
+        .selectNext();
+      else if (lastSelectedBrowserColumn === 7) {
+        popupBrowser
+          .selectedContentTypeIndex()
+          .set(
+            popupBrowser.selectedContentTypeIndex().get() < 4 ?
+            popupBrowser.selectedContentTypeIndex().get() + 1 : 0
+          );
+      }
+    } else {
+      if (!lastSelectedBrowserColumn || lastSelectedBrowserColumn === 0 || lastSelectedBrowserColumn > 7) {
+        //popupBrowser.selectPreviousFile();
+        popupBrowser
+          .resultsColumn()
+          .createCursorItem()
+          .selectPrevious();
+        lastSelectedBrowserColumn = 0;
+      } else if (lastSelectedBrowserColumn === 1)
+        popupBrowser
+        .smartCollectionColumn()
+        .createCursorItem()
+        .selectPrevious();
+      else if (lastSelectedBrowserColumn === 2)
+        popupBrowser
+        .locationColumn()
+        .createCursorItem()
+        .selectPrevious();
+      else if (lastSelectedBrowserColumn === 3)
+        popupBrowser
+        .categoryColumn()
+        .createCursorItem()
+        .selectPrevious();
+      else if (lastSelectedBrowserColumn === 4)
+        popupBrowser
+        .creatorColumn()
+        .createCursorItem()
+        .selectPrevious();
+      else if (lastSelectedBrowserColumn === 5)
+        popupBrowser
+        .deviceTypeColumn()
+        .createCursorItem()
+        .selectPrevious();
+      else if (lastSelectedBrowserColumn === 6)
+        popupBrowser
+        .fileTypeColumn()
+        .createCursorItem()
+        .selectPrevious();
+      else if (lastSelectedBrowserColumn === 7) {
+        popupBrowser
+          .selectedContentTypeIndex()
+          .set(
+            popupBrowser.selectedContentTypeIndex().get() > 0 ?
+            popupBrowser.selectedContentTypeIndex().get() - 1 : 4
+          );
+      }
+    }
+    return true;
+  } else if (data1 === PUSH_ROTARY_SHIFT && popupBrowser.exists().get()) {
+    if (data2 === 1) {
+      if (lastSelectedBrowserColumn === undefined)
+        lastSelectedBrowserColumn = 1
+      else
+        lastSelectedBrowserColumn = lastSelectedBrowserColumn < 7 ? lastSelectedBrowserColumn + 1 : 0
+    } else {
+      lastSelectedBrowserColumn = lastSelectedBrowserColumn > 0 ? lastSelectedBrowserColumn - 1 : 7
+    }
+    sendMidi(
+      CC_CHANNEL_13,
+      PUSH_ROTARY_SHIFT,
+      lastSelectedBrowserColumn === undefined ? 0 : lastSelectedBrowserColumn
+    );
+
+    sendMidi(
+      CC_CHANNEL_13,
+      PUSH_ROTARY,
+      lastSelectedBrowserColumn === undefined ? 0 : lastSelectedBrowserColumn
+    );
+    return true;
+  } else if (data1 === PUSH_ROTARY_PUSH && data2 > 0 && popupBrowser.exists().get()) {
+    popupBrowser.commit();
+    return true;
+  } else if (data1 === PUSH_ROTARY_PUSH_SHIFT && popupBrowser.exists().get()) {
+    popupBrowser.cancel();
+    return true;
+  }
+  return false;
+}
+
 function setBrightness(cc, b) {
   sendMidi(BRIGHTNESS, cc, b);
 }
@@ -888,8 +934,8 @@ function rgb2hsv(r, g, b) {
   }
 
   return {
-    h: h,
-    s: s,
+    h: h * 127,
+    s: s * 127,
     v: v
   };
 }
