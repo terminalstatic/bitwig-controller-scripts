@@ -15,6 +15,12 @@ let isPushed = false
 
 const PADS_SHIFT_START = 51
 const PADS_SHIFT_END = 66
+const SEQ_PAGE_0 = 74
+const SEQ_PAGE_1 = 75
+const SEQ_PAGE_2 = 76
+const SEQ_PAGE_3 = 77
+
+const TOGGLE_RESOLUTION = 72
 
 host.setShouldFailOnDeprecatedUse(true);
 
@@ -27,8 +33,19 @@ let noteOffset = 0
 let noteTable = []
 let steps = []
 
-let resolutions = [1, 2 / 3, 1 / 2, 1 / 3, 1 / 4, 1 / 6, 1 / 8, 1 / 12];
-
+let resolution = [1, 2 / 3, 1 / 2, 1 / 3, 1 / 4, 1 / 6, 1 / 8, 1 / 12];
+let resolutionText = [
+    "1/4",
+    "1/4t",
+    "1/8",
+    "1/8t",
+    "1/16",
+    "1/16t",
+    "1/32",
+    "1/32t"
+];
+let resolutionIndex = 1;
+let seqPageIndex = 0;
 
 function init() {
 
@@ -47,25 +64,31 @@ function init() {
 
     sendMidi(CHANNEL_10, VELOCITY_OFFSET_ROTARY, velocity)
 
-    cursorClip = host.createLauncherCursorClip(32, 128);
-    cursorClip.setStepSize(resolutions[2]);
+    cursorTrack = host.createCursorTrack(0, 0);
+
+    cursorClip = host.createLauncherCursorClip(16, 128);
+    cursorClip.setStepSize(resolution[resolutionIndex]);
 
     cursorClip.playingStep().markInterested()
     cursorClip.getLoopLength().markInterested()
+    cursorClip.getPlayStart().markInterested()
+    cursorClip.getPlayStop().markInterested()
+
     cursorClip.color().markInterested()
 
-    steps = initArray(0, ((1 / resolutions[2]) * cursorClip.getLoopLength().get()))
+    steps = initArray(0, 16)
     cursorClip.addStepDataObserver(function (x, y, state) {
         println("x: " + x)
         println("y: " + y)
         println("state: " + state);
 
         steps[x] = state;
-        let hsbColor = rgb2hsv(cursorClip.color().red(), cursorClip.color().green(), cursorClip.color().blue())
-        if (state > 0)
+        //println("Step + " + x)
+        /*let hsbColor = rgb2hsv(cursorClip.color().red(), cursorClip.color().green(), cursorClip.color().blue())
+        if (state === 2)
             setPadColor(PADS_SHIFT_START + x, hsbColor.h, hsbColor.s, 127)
-        else
-            setPadColor(PADS_SHIFT_START + x, 0, 0, 0)
+        else if (state <= 0)
+            setPadColor(PADS_SHIFT_START + x, 0, 0, 0)*/
     })
 
     // Init Pads on shift page
@@ -119,35 +142,70 @@ function onMidi0(status, data1, data2) {
             }
         } else if (data1 >= PADS_SHIFT_START && data1 <= PADS_SHIFT_END) {
             cursorClip.toggleStep(data1 - PADS_SHIFT_START, 36, 127)
+        } else if (data1 === TOGGLE_RESOLUTION) {
+            if (resolutionIndex < resolution.length - 1) {
+                resolutionIndex++
+            } else {
+                resolutionIndex = 0
+            }
+            cursorClip.setStepSize(resolution[resolutionIndex])
+            host.showPopupNotification(resolutionText[resolutionIndex])
+        } else if (data1 >= SEQ_PAGE_0 && data1 <= SEQ_PAGE_3) {
+            let localIndex = 3 - (SEQ_PAGE_3 - data1)
+            println(localIndex)
+            switch (localIndex) {
+                case 0:
+                    cursorClip.scrollStepsPageBackwards();
+                    seqPageIndex--;
+                    break;
+                case 1:
+                    break;
+                case 2:
+                    break;
+                case 3:
+
+                    cursorClip.scrollStepsPageForward();
+                    seqPageIndex++;
+
+                    break;
+            }
         }
     }
 }
 
 function flush() {
-    //println(cursorClip.playingStep().get())
+    println("flush")
+
+    //cursorClip.quantize(0.0000000001)
+
+    /*if (cursorClip.playingStep().get() === -1) {
+        for (let i = 0; i < 16; i++) {
+            setPadColor(PADS_SHIFT_START + i, 0, 0, 0)
+        }
+    }*/
+
     let hsbColor = rgb2hsv(cursorClip.color().red(), cursorClip.color().green(), cursorClip.color().blue())
     for (let i = 0; i < steps.length; i++) {
-        if (steps[i] > 0)
+        if (steps[i] === 2)
             setPadColor(PADS_SHIFT_START + i, hsbColor.h, hsbColor.s, 127)
-        else
+        else if (steps[i] === 1)
+            setPadColor(PADS_SHIFT_START + i, hsbColor.h, hsbColor.s, 16)
+        else if (steps[i] <= 0)
             setPadColor(PADS_SHIFT_START + i, 0, 0, 0)
     }
 
     let step = cursorClip.playingStep().get()
-    if (step >= 0) {
+    println(step)
+    if (step === 0) {
+        cursorClip.scrollStepsStepForward();
+        cursorClip.scrollStepsStepBackwards();
+    }
+    println((step >= 0 && step >= (seqPageIndex * 16) && step <= (seqPageIndex * 16) + 15))
+    if (step >= 0 && step >= (seqPageIndex * 16) && step <= (seqPageIndex * 16) + 15) {
         //setBrightness(PADS_SHIFT_START + step, 127)
-        setPadColor(PADS_SHIFT_START + step, 0, 0, 127)
-        if (step === 0) {
-            if (steps[((1 / resolutions[2]) * cursorClip.getLoopLength().get()) - 1] > 0)
-                setPadColor(PADS_SHIFT_START + ((1 / resolutions[2]) * cursorClip.getLoopLength().get()) - 1, hsbColor.h, hsbColor.s, 127)
-            else
-                setPadColor(PADS_SHIFT_START + ((1 / resolutions[2]) * cursorClip.getLoopLength().get()) - 1, 0, 0, 0)
-        } else {
-            if (steps[step - 1] > 0)
-                setPadColor(PADS_SHIFT_START + step - 1, hsbColor.h, hsbColor.s, 127)
-            else
-                setPadColor(PADS_SHIFT_START + step - 1, 0, 0, 0)
-        }
+        if (PADS_SHIFT_START + step <= 127)
+            setPadColor(PADS_SHIFT_START + step % 16, 0, 0, 127)
+
     }
 }
 
