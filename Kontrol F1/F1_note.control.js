@@ -8,6 +8,16 @@ const LOWEST_CC = 1;
 const HIGHEST_CC = 119;
 
 const CHANNEL_10 = 185
+
+const PLAY_BUTTON = 26;
+const PLAY_BUTTON_SHIFT = 67;
+
+const ARRANGER_RECORD_BUTTON = 27
+const ARRANGER_RECORD_BUTTON_SHIFT = 68
+
+const ARRANGER_AUTOMATION = 28
+const ARRANGER_AUTOMATION_SHIFT = 69
+
 const VELOCITY_OFFSET_ROTARY = 41
 const SEQ_VELOCITY_NOTE_ROTARY = 78
 
@@ -55,6 +65,7 @@ let resolutionIndex = 4;
 let seqPageIndex = 0;
 
 function init() {
+    transport = host.createTransport();
 
     noteIn = host.getMidiInPort(0).createNoteInput("", "?9????");
     noteIn.setShouldConsumeEvents(false);
@@ -80,6 +91,7 @@ function init() {
     cursorClip.getLoopLength().markInterested()
     cursorClip.getPlayStart().markInterested()
     cursorClip.getPlayStop().markInterested()
+    cursorClip.getShuffle().markInterested()
 
     cursorClip.color().markInterested()
 
@@ -128,7 +140,9 @@ function onMidi0(status, data1, data2) {
             let index = data1 - LOWEST_CC;
             userControls.getControl(index).set(data2, 128);
         }*/
-        if (data1 === VELOCITY_OFFSET_ROTARY && isPushed === false) {
+        if (handleTransport(status, data1, data2)) {
+            return;
+        } else if (data1 === VELOCITY_OFFSET_ROTARY && isPushed === false) {
             if (data2 === 127) {
                 if (velocity > 0) {
                     velocity--;
@@ -157,7 +171,7 @@ function onMidi0(status, data1, data2) {
                     setNoteTable(noteIn, noteTable, noteOffset)
                 }
             }
-        } else if (data1 === SEQ_VELOCITY_NOTE_ROTARY && isSeqPushed === false) {
+        } else if (data1 === SEQ_VELOCITY_NOTE_ROTARY && isSeqPushed === true) {
             if (data2 === 127) {
                 if (currentSeqNote > 0) {
                     currentSeqNote--;
@@ -169,7 +183,7 @@ function onMidi0(status, data1, data2) {
             }
             sendMidi(CHANNEL_10, SEQ_PUSH_ROTARY, Math.abs(noteOffset))
             host.showPopupNotification(notesText[currentSeqNote % 12] + (parseInt(currentSeqNote / 12) - 2))
-        } else if (data1 === SEQ_VELOCITY_NOTE_ROTARY && isSeqPushed === true) {
+        } else if (data1 === SEQ_VELOCITY_NOTE_ROTARY && isSeqPushed === false) {
             if (data2 === 127) {
                 if (currentSeqVelocity > 0) {
                     currentSeqVelocity--;
@@ -227,7 +241,7 @@ function flush() {
     let hsbColor = rgb2hsv(cursorClip.color().red(), cursorClip.color().green(), cursorClip.color().blue())
     for (let i = 0; i < steps.length; i++) {
         if (steps[i][currentSeqNote] === 2) {
-            setPadColor(PADS_SHIFT_START + i, hsbColor.h, hsbColor.s, 127)
+            setPadColor(PADS_SHIFT_START + i, hsbColor.h, hsbColor.s, 95)
         } else if (steps[i][currentSeqNote] === 1) {
             setPadColor(PADS_SHIFT_START + i, hsbColor.h, hsbColor.s, 16)
             /*} else if (steps[i][2] <= 0) {
@@ -253,6 +267,27 @@ function flush() {
 
 function exit() {
 
+}
+
+function handleTransport(status, data1, data2) {
+    if ((data1 === PLAY_BUTTON || data1 === PLAY_BUTTON_SHIFT) && !isPushed && !isSeqPushed) {
+        transport.play();
+        return true;
+    } else if ((data1 === PLAY_BUTTON || data1 === PLAY_BUTTON_SHIFT) && (isPushed || isSeqPushed)) {
+        transport.setPosition(0);
+        return true;
+    } else if ((data1 === ARRANGER_RECORD_BUTTON || data1 === ARRANGER_RECORD_BUTTON_SHIFT && !isPushed && !isSeqPushed)) {
+        transport.record()
+        return true;
+    } else if ((data1 === ARRANGER_AUTOMATION || data1 === ARRANGER_AUTOMATION_SHIFT) && !isPushed && !isSeqPushed) {
+        transport.toggleWriteArrangerAutomation()
+        return true;
+    } else if ((data1 === ARRANGER_AUTOMATION || data1 === ARRANGER_AUTOMATION_SHIFT) && (isPushed || isSeqPushed)) {
+        transport.toggleWriteClipLauncherAutomation()
+        transport.isClipLauncherOverdubEnabled().toggle();
+        return true;
+    }
+    return false;
 }
 
 function notesInit(noteTable) {
