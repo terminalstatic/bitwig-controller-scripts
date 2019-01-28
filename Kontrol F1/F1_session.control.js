@@ -224,7 +224,7 @@ function init() {
   }
 
   transport.isPlaying().markInterested();
-  println("F1 initialized!");
+  println("F1 session control initialized!");
 }
 
 // Called when a short MIDI message is received on MIDI input port 0.

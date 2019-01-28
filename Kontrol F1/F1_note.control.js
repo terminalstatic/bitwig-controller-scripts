@@ -9,9 +9,13 @@ const HIGHEST_CC = 119;
 
 const CHANNEL_10 = 185
 const VELOCITY_OFFSET_ROTARY = 41
+const SEQ_VELOCITY_NOTE_ROTARY = 78
 
 const PUSH_ROTARY = 42
+const SEQ_PUSH_ROTARY = 79
+
 let isPushed = false
+let isSeqPushed = false
 
 const PADS_SHIFT_START = 51
 const PADS_SHIFT_END = 66
@@ -32,6 +36,9 @@ let velocity = 127
 let noteOffset = 0
 let noteTable = []
 let steps = []
+let notesText = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+let currentSeqNote = 36
+let currentSeqVelocity = 127
 
 let resolution = [1, 2 / 3, 1 / 2, 1 / 3, 1 / 4, 1 / 6, 1 / 8, 1 / 12];
 let resolutionText = [
@@ -44,7 +51,7 @@ let resolutionText = [
     "1/32",
     "1/32t"
 ];
-let resolutionIndex = 1;
+let resolutionIndex = 4;
 let seqPageIndex = 0;
 
 function init() {
@@ -76,19 +83,18 @@ function init() {
 
     cursorClip.color().markInterested()
 
-    steps = initArray(0, 16)
+
+    steps = new Array(16)
+    for (let i = 0; i < steps.length; i++) {
+        steps[i] = new Array(128)
+    }
+
     cursorClip.addStepDataObserver(function (x, y, state) {
         println("x: " + x)
         println("y: " + y)
         println("state: " + state);
 
-        steps[x] = state;
-        //println("Step + " + x)
-        /*let hsbColor = rgb2hsv(cursorClip.color().red(), cursorClip.color().green(), cursorClip.color().blue())
-        if (state === 2)
-            setPadColor(PADS_SHIFT_START + x, hsbColor.h, hsbColor.s, 127)
-        else if (state <= 0)
-            setPadColor(PADS_SHIFT_START + x, 0, 0, 0)*/
+        steps[x][y] = state;
     })
 
     // Init Pads on shift page
@@ -96,16 +102,27 @@ function init() {
         setPadColor(i, 0, 0, 0);
     }
 
-    println("qunexus initialized!");
+    println("F1 note control initialized!");
 }
 
 function onMidi0(status, data1, data2) {
     printMidi(status, data1, data2)
-    if (PUSH_ROTARY === 127) {
-        isPushed = true
-    } else {
-        isPushed = false
+    if (data1 === PUSH_ROTARY) {
+        if (data2 === 127) {
+            isPushed = true
+        } else {
+            isPushed = false
+        }
     }
+
+    if (data1 === SEQ_PUSH_ROTARY) {
+        if (data2 === 127) {
+            isSeqPushed = true
+        } else {
+            isSeqPushed = false
+        }
+    }
+
     if (isChannelController(status)) {
         /*if (data1 >= LOWEST_CC && data1 <= HIGHEST_CC) {
             let index = data1 - LOWEST_CC;
@@ -136,12 +153,35 @@ function onMidi0(status, data1, data2) {
             } else if (data2 === 1) {
                 if (noteOffset < 80) {
                     noteOffset++
-                    sendMidi(CHANNEL_10, VELOCITY_ROTARY, Math.abs(noteOffset))
+                    sendMidi(CHANNEL_10, VELOCITY_OFFSET_ROTARY, Math.abs(noteOffset))
                     setNoteTable(noteIn, noteTable, noteOffset)
                 }
             }
+        } else if (data1 === SEQ_VELOCITY_NOTE_ROTARY && isSeqPushed === false) {
+            if (data2 === 127) {
+                if (currentSeqNote > 0) {
+                    currentSeqNote--;
+                }
+            } else {
+                if (currentSeqNote < 127) {
+                    currentSeqNote++;
+                }
+            }
+            sendMidi(CHANNEL_10, SEQ_PUSH_ROTARY, Math.abs(noteOffset))
+            host.showPopupNotification(notesText[currentSeqNote % 12] + (parseInt(currentSeqNote / 12) - 2))
+        } else if (data1 === SEQ_VELOCITY_NOTE_ROTARY && isSeqPushed === true) {
+            if (data2 === 127) {
+                if (currentSeqVelocity > 0) {
+                    currentSeqVelocity--;
+                }
+            } else {
+                if (currentSeqVelocity < 127) {
+                    currentSeqVelocity++;
+                }
+            }
+            host.showPopupNotification(currentSeqVelocity)
         } else if (data1 >= PADS_SHIFT_START && data1 <= PADS_SHIFT_END) {
-            cursorClip.toggleStep(data1 - PADS_SHIFT_START, 36, 127)
+            cursorClip.toggleStep(data1 - PADS_SHIFT_START, currentSeqNote, currentSeqVelocity)
         } else if (data1 === TOGGLE_RESOLUTION) {
             if (resolutionIndex < resolution.length - 1) {
                 resolutionIndex++
@@ -186,21 +226,23 @@ function flush() {
 
     let hsbColor = rgb2hsv(cursorClip.color().red(), cursorClip.color().green(), cursorClip.color().blue())
     for (let i = 0; i < steps.length; i++) {
-        if (steps[i] === 2)
+        if (steps[i][currentSeqNote] === 2) {
             setPadColor(PADS_SHIFT_START + i, hsbColor.h, hsbColor.s, 127)
-        else if (steps[i] === 1)
+        } else if (steps[i][currentSeqNote] === 1) {
             setPadColor(PADS_SHIFT_START + i, hsbColor.h, hsbColor.s, 16)
-        else if (steps[i] <= 0)
+            /*} else if (steps[i][2] <= 0) {
+                setPadColor(PADS_SHIFT_START + i, 0, 0, 0)*/
+        } else {
             setPadColor(PADS_SHIFT_START + i, 0, 0, 0)
+        }
     }
 
     let step = cursorClip.playingStep().get()
-    println(step)
     if (step === 0) {
         cursorClip.scrollStepsStepForward();
         cursorClip.scrollStepsStepBackwards();
     }
-    println((step >= 0 && step >= (seqPageIndex * 16) && step <= (seqPageIndex * 16) + 15))
+    //println((step >= 0 && step >= (seqPageIndex * 16) && step <= (seqPageIndex * 16) + 15))
     if (step >= 0 && step >= (seqPageIndex * 16) && step <= (seqPageIndex * 16) + 15) {
         //setBrightness(PADS_SHIFT_START + step, 127)
         if (PADS_SHIFT_START + step <= 127)
