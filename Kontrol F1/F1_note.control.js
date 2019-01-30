@@ -34,6 +34,18 @@ const SEQ_PAGE_1 = 75
 const SEQ_PAGE_2 = 76
 const SEQ_PAGE_3 = 77
 
+const PAN_ROTARY_START = 2;
+const PAN_ROTARY_END = 5
+
+const PAN_ROTARY_START_SHIFT = 43;
+const PAN_ROTARY_END_SHIFT = 46;
+
+const VOLUME_SLIDERS_START = 6;
+const VOLUME_SLIDERS_END = 9;
+
+const VOLUME_SLIDERS_START_SHIFT = 47;
+const VOLUME_SLIDERS_END_SHIFT = 50;
+
 const TOGGLE_RESOLUTION = 72
 
 host.setShouldFailOnDeprecatedUse(true);
@@ -113,6 +125,13 @@ function init() {
     for (let i = PADS_SHIFT_START; i <= PADS_SHIFT_END; i++) {
         setPadColor(i, 0, 0, 0);
     }
+
+    cursorTrack = host.createCursorTrack(0, 0);
+    cursorDevice = cursorTrack.createCursorDevice();
+
+    cursorDevice.hasDrumPads().markInterested();
+
+    drumPadBank = cursorDevice.createDrumPadBank(16);
 
     println("F1 note control initialized!");
 }
@@ -223,6 +242,11 @@ function onMidi0(status, data1, data2) {
 
                     break;
             }
+        } else if ((data1 >= VOLUME_SLIDERS_START || data1 >= VOLUME_SLIDERS_START_SHIFT) &&
+            (data1 <= VOLUME_SLIDERS_END || data1 <= VOLUME_SLIDERS_END_SHIFT)) {
+            if (cursorDevice.hasDrumPads().get()) {
+                drumPadBank.getItemAt(0).volume().set(data2, 128);
+            }
         }
     }
 }
@@ -230,6 +254,9 @@ function onMidi0(status, data1, data2) {
 function flush() {
     println("flush")
 
+    if (cursorDevice.hasDrumPads) {
+        println("Drum device")
+    }
     //cursorClip.quantize(0.0000000001)
 
     /*if (cursorClip.playingStep().get() === -1) {
