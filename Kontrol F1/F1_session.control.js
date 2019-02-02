@@ -143,8 +143,35 @@ function init() {
 
   popupBrowser.exists().markInterested();
   popupBrowser.selectedContentTypeIndex().markInterested();
-  trackBank.followCursorTrack(cursorTrack);
 
+
+  categoryCursor = popupBrowser.categoryColumn().createCursorItem();
+  categoryCursor.hitCount().markInterested();
+
+  creatorCursor = popupBrowser.creatorColumn().createCursorItem();
+  creatorCursor.hitCount().markInterested();
+
+  deviceCursor = popupBrowser.deviceColumn().createCursorItem();
+  deviceCursor.hitCount().markInterested();
+
+  deviceTypeCursor = popupBrowser.deviceTypeColumn().createCursorItem();
+  deviceTypeCursor.hitCount().markInterested();
+
+  fileTypeCursor = popupBrowser.fileTypeColumn().createCursorItem();
+  fileTypeCursor.hitCount().markInterested();
+
+  locationCursor = popupBrowser.locationColumn().createCursorItem();
+  locationCursor.hitCount().markInterested();
+
+  resultsCursor = popupBrowser.resultsColumn().createCursorItem();
+
+  smartCollectionCursor = popupBrowser.smartCollectionColumn().createCursorItem();
+  smartCollectionCursor.hitCount().markInterested();
+
+  tagCursor = popupBrowser.tagColumn().createCursorItem();
+  tagCursor.hitCount().markInterested();
+
+  trackBank.followCursorTrack(cursorTrack);
   trackBank.cursorIndex().markInterested();
   trackBank.sceneBank().cursorIndex().markInterested();
   trackBank.sceneBank().scrollPosition().markInterested();
@@ -242,12 +269,10 @@ function onMidi0(status, data1, data2) {
         shiftSpecialIsPressed = false
     }
     printMidi(status, data1, data2);
-    println(specialIsPressed)
-    println(shiftSpecialIsPressed)
 
     if (handleTransport(status, data1, data2)) return;
 
-    if (handleScene(status, data1, data1)) return;
+    if (handleScene(status, data1, data2)) return;
 
     if (handleClips(status, data1, data2)) return;
 
@@ -509,7 +534,7 @@ function handleScene(status, data1, data2) {
   return false;
 }
 
-function handleClips(status, data1, data1) {
+function handleClips(status, data1, data2) {
   if (data1 >= CLIP_START_CC && data1 <= CLIP_END_CC && data2 > 0) {
     let pnum = data1 - CLIP_START_CC;
     if (specialIsPressed) {
@@ -685,7 +710,6 @@ function handleChannels(status, data1, data2) {
       .set(data2, 128);
     return true;
   } else if (data1 >= PAN_ROTARY_START && data1 <= PAN_ROTARY_END + 1 && specialIsPressed) {
-    println("send")
     cursorTrack.sendBank().getItemAt(3 - (PAN_ROTARY_END + 1 - data1)).set(data2, 128);
     return true;
   } else if (data1 >= MUTE_AND_SOLO_START && data1 <= MUTE_AND_SOLO_END && specialIsPressed) {
@@ -731,7 +755,6 @@ function handleChannels(status, data1, data2) {
     return true;
   } else if (
     data1 >= MUTE_AND_SOLO_START_SHIFT && data1 <= MUTE_AND_SOLO_END_SHIFT && !specialIsPressed) {
-    println("solo")
     if (
       trackBank
       .getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END_SHIFT - data1))
@@ -755,7 +778,6 @@ function handleChannels(status, data1, data2) {
 
 function handleBrowser(status, data1, data2) {
   if (data1 === BROWSE_BUTTON && specialIsPressed && !popupBrowser.exists().get()) {
-    println("Insert")
     cursorDevice.afterDeviceInsertionPoint().browse()
     //deviceBrowser.startBrowsing();
     //deviceBrowser.activateSession(deviceBrowser.getDeviceSession());
@@ -770,44 +792,27 @@ function handleBrowser(status, data1, data2) {
     return true;
   } else if (data1 === PUSH_ROTARY && popupBrowser.exists().get()) {
     if (data2 === 1) {
-      if (!lastSelectedBrowserColumn || lastSelectedBrowserColumn === 0 || lastSelectedBrowserColumn > 7) {
+      if (!lastSelectedBrowserColumn || lastSelectedBrowserColumn === 0 || lastSelectedBrowserColumn > 9) {
         //popupBrowser.selectNextFile();
-        popupBrowser
-          .resultsColumn()
-          .createCursorItem()
-          .selectNext();
+        resultsCursor.selectNext();
         lastSelectedBrowserColumn = 0;
       } else if (lastSelectedBrowserColumn === 1)
-        popupBrowser
-        .smartCollectionColumn()
-        .createCursorItem()
-        .selectNext();
+        smartCollectionCursor.selectNext();
       else if (lastSelectedBrowserColumn === 2)
-        popupBrowser
-        .locationColumn()
-        .createCursorItem()
-        .selectNext();
+        locationCursor.selectNext();
       else if (lastSelectedBrowserColumn === 3)
-        popupBrowser
-        .categoryColumn()
-        .createCursorItem()
-        .selectNext();
+        deviceCursor.selectNext();
       else if (lastSelectedBrowserColumn === 4)
-        popupBrowser
-        .creatorColumn()
-        .createCursorItem()
-        .selectNext();
+        categoryCursor.selectNext();
       else if (lastSelectedBrowserColumn === 5)
-        popupBrowser
-        .deviceTypeColumn()
-        .createCursorItem()
-        .selectNext();
+        tagCursor.selectNext();
       else if (lastSelectedBrowserColumn === 6)
-        popupBrowser
-        .fileTypeColumn()
-        .createCursorItem()
-        .selectNext();
-      else if (lastSelectedBrowserColumn === 7) {
+        creatorCursor.selectNext();
+      else if (lastSelectedBrowserColumn === 7)
+        deviceTypeCursor.selectNext();
+      else if (lastSelectedBrowserColumn === 8)
+        fileTypeCursor.selectNext();
+      else if (lastSelectedBrowserColumn === 9) {
         popupBrowser
           .selectedContentTypeIndex()
           .set(
@@ -816,44 +821,27 @@ function handleBrowser(status, data1, data2) {
           );
       }
     } else {
-      if (!lastSelectedBrowserColumn || lastSelectedBrowserColumn === 0 || lastSelectedBrowserColumn > 7) {
+      if (!lastSelectedBrowserColumn || lastSelectedBrowserColumn === 0 || lastSelectedBrowserColumn > 9) {
         //popupBrowser.selectPreviousFile();
-        popupBrowser
-          .resultsColumn()
-          .createCursorItem()
-          .selectPrevious();
+        resultsCursor.selectPrevious();
         lastSelectedBrowserColumn = 0;
       } else if (lastSelectedBrowserColumn === 1)
-        popupBrowser
-        .smartCollectionColumn()
-        .createCursorItem()
-        .selectPrevious();
+        smartCollectionCursor.selectPrevious();
       else if (lastSelectedBrowserColumn === 2)
-        popupBrowser
-        .locationColumn()
-        .createCursorItem()
-        .selectPrevious();
+        locationCursor.selectPrevious();
       else if (lastSelectedBrowserColumn === 3)
-        popupBrowser
-        .categoryColumn()
-        .createCursorItem()
-        .selectPrevious();
+        deviceCursor.selectPrevious();
       else if (lastSelectedBrowserColumn === 4)
-        popupBrowser
-        .creatorColumn()
-        .createCursorItem()
-        .selectPrevious();
+        categoryCursor.selectPrevious();
       else if (lastSelectedBrowserColumn === 5)
-        popupBrowser
-        .deviceTypeColumn()
-        .createCursorItem()
-        .selectPrevious();
+        tagCursor.selectPrevious();
       else if (lastSelectedBrowserColumn === 6)
-        popupBrowser
-        .fileTypeColumn()
-        .createCursorItem()
-        .selectPrevious();
-      else if (lastSelectedBrowserColumn === 7) {
+        creatorCursor.selectPrevious();
+      else if (lastSelectedBrowserColumn === 7)
+        deviceTypeCursor.selectPrevious();
+      else if (lastSelectedBrowserColumn === 8)
+        fileTypeCursor.selectPrevious();
+      else if (lastSelectedBrowserColumn === 9) {
         popupBrowser
           .selectedContentTypeIndex()
           .set(
@@ -868,9 +856,9 @@ function handleBrowser(status, data1, data2) {
       if (lastSelectedBrowserColumn === undefined)
         lastSelectedBrowserColumn = 1
       else
-        lastSelectedBrowserColumn = lastSelectedBrowserColumn < 7 ? lastSelectedBrowserColumn + 1 : 0
+        lastSelectedBrowserColumn = chooseBrowserCursor(lastSelectedBrowserColumn, true)
     } else {
-      lastSelectedBrowserColumn = lastSelectedBrowserColumn > 0 ? lastSelectedBrowserColumn - 1 : 7
+      lastSelectedBrowserColumn = chooseBrowserCursor(lastSelectedBrowserColumn, false)
     }
     sendMidi(
       CC_CHANNEL_13,
@@ -955,4 +943,97 @@ function getClipFromTrackBank(t) {
     .getItemAt(parseInt(t / 4))
     .clipLauncherSlotBank()
     .getItemAt(t % 4)
+}
+
+function chooseBrowserCursor(index, forwards) {
+
+  if (forwards) {
+    switch (index + 1) {
+      case 1:
+        if (smartCollectionCursor.hitCount().get() === 0) {
+          return chooseBrowserCursor(index + 1, true)
+        }
+        break;
+      case 2:
+        if (locationCursor.hitCount().get() === 0) {
+          return chooseBrowserCursor(index + 1, true)
+        }
+        break;
+      case 3:
+        if (deviceCursor.hitCount().get() === 0) {
+          return chooseBrowserCursor(index + 1, true)
+        }
+        break;
+      case 4:
+        if (categoryCursor.hitCount().get() === 0) {
+          return chooseBrowserCursor(index + 1, true)
+        }
+        break;
+      case 5:
+        if (tagCursor.hitCount().get() === 0) {
+          return chooseBrowserCursor(index + 1, true)
+        }
+        break;
+      case 6:
+        if (creatorCursor.hitCount().get() === 0) {
+          return chooseBrowserCursor(index + 1, true)
+        }
+        break;
+      case 7:
+        if (deviceTypeCursor.hitCount().get() === 0) {
+          return chooseBrowserCursor(index + 1, true)
+        }
+        break;
+      case 8:
+        if (fileTypeCursor.hitCount().get() === 0) {
+          return chooseBrowserCursor(index + 1, true)
+        }
+        break;
+    }
+    return (index < 9 ? index + 1 : 0)
+  } else {
+    switch (index - 1) {
+      case 1:
+        if (smartCollectionCursor.hitCount().get() === 0) {
+          return chooseBrowserCursor(index - 1, false)
+        }
+        break;
+      case 2:
+        if (locationCursor.hitCount().get() === 0) {
+          return chooseBrowserCursor(index - 1, false)
+        }
+        break;
+      case 3:
+        if (deviceCursor.hitCount().get() === 0) {
+          return chooseBrowserCursor(index - 1, false)
+        }
+        break;
+      case 4:
+        if (categoryCursor.hitCount().get() === 0) {
+          return chooseBrowserCursor(index - 1, false)
+        }
+        break;
+      case 5:
+        if (tagCursor.hitCount().get() === 0) {
+          return chooseBrowserCursor(index - 1, false)
+        }
+        break;
+      case 6:
+        if (creatorCursor.hitCount().get() === 0) {
+          return chooseBrowserCursor(index - 1, false)
+        }
+        break;
+      case 7:
+        if (deviceTypeCursor.hitCount().get() === 0) {
+          return chooseBrowserCursor(index - 1, false)
+        }
+        break;
+      case 8:
+        if (fileTypeCursor.hitCount().get() === 0) {
+          return chooseBrowserCursor(index - 1, false)
+        }
+        break;
+    }
+    return (index > 0 ? index - 1 : 9)
+  }
 }
