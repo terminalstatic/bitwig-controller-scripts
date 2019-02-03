@@ -5,7 +5,7 @@ QuNexus scripts are just generic midi keyboard scripts, multi version has all ch
 Nothing special here, any generic keyboard script does the job. I just keep this for convenience.
 
 ## Kontrol F1
-**This is still work in progress**
+**!!This is still work in progress!!**
 ### Bitwig Scene Control
 
 #### Buttons
@@ -39,9 +39,9 @@ Nothing special here, any generic keyboard script does the job. I just keep this
 
 **browse** exit browser without selecting an item
 
-###### Pads
+##### Pads
 
-**top row pads**and **top row pads + shift** launch scene
+**top row pads** and **top row pads + shift** launch scene
 
 **row 2-4** and **row 2-4 + shift** launch/stop clips
 
