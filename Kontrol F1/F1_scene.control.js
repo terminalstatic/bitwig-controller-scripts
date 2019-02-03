@@ -84,7 +84,7 @@ host.setShouldFailOnDeprecatedUse(true);
 
 host.defineController(
   "Native Instruments",
-  "Traktor Kontrol F1 Session",
+  "Traktor Kontrol F1 Scene",
   "0.1",
   "72c70fde-f37c-4935-a7bc-9b433c42d0d3",
   "terminal_static"
@@ -251,7 +251,7 @@ function init() {
   }
 
   transport.isPlaying().markInterested();
-  println("F1 session control initialized!");
+  println("F1 scene control initialized!");
 }
 
 // Called when a short MIDI message is received on MIDI input port 0.
@@ -498,6 +498,7 @@ function handleTransport(status, data1, data2) {
     transport.play();
     return true;
   } else if (data1 === PLAY_RESET_BUTTON_SHIFT && data2 > 0) {
+    transport.stop();
     transport.setPosition(0);
     return true;
   } else if (data1 === ARRANGER_RECORD_BUTTON && data2 > 0) {
