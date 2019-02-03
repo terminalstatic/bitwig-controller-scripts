@@ -6,9 +6,13 @@ Nothing special here, any generic keyboard script does the job. I just keep this
 
 ## Kontrol F1
 **!!This is still work in progress!!**
+
+Basically just me playing around a little with the F1 and the bitwig api, basically having fun blinking some lights with no serious claim for code quality nor am I doing serious testing on this ... 
+
 ### Bitwig Scene Control
 
-Copy Kontrol F1 dir into bitwigs controller scripts dir, open and select Bitwig_scene.nckf1 template in native instruments controller scripts editor, in bitwig choose settings -> controllers -> controller -> add -> Native Instruments -> Traktor Kontrol F1 Scene
+#### Installation
+Copy Kontrol F1 dir into bitwigs controller scripts dir, open and select Bitwig_scene.nckf1 template in native instruments controller scripts editor, in bitwig choose settings -> controllers -> controller -> add -> Native Instruments -> Traktor Kontrol F1 Scene.
 
 For the ports choose port 1 for in and out (script currently only works with one F1 device).
 
