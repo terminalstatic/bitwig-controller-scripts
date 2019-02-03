@@ -7,7 +7,7 @@ Nothing special here, any generic keyboard script does the job. I just keep this
 ## Kontrol F1
 **!!This is still work in progress!!**
 
-Basically just me playing around a little with the F1 and the bitwig api, basically having fun blinking some lights with no serious claim for code quality nor am I doing serious testing on this :) ... 
+Basically just me playing around a little with the F1 and the bitwig api, having fun blinking some lights ...
 
 ### Bitwig Scene Control
 
@@ -37,6 +37,8 @@ For the ports choose port 1 for in and out (script currently only works with one
 
 **browse** open device browser on active device/select new
 
+**push rotary push encoder + type** and **shift + push rotary push encoder + type** move effect bank forwards/backwards
+
 #### Browser
 
 **rotary push encoder** move next/prev in column
@@ -57,9 +59,17 @@ For the ports choose port 1 for in and out (script currently only works with one
 
 **shift + push rotary push encoder + pad** delete clip
 
-**small pads 1-4** mute tracks
+**small pads 1-3** mute tracks
 
-**small pads 1-4** solo tracks
+**small pad 4** mute master
+
+**small pads 1-3 + shift** solo tracks
+
+**small pad 4 + shift** solo master
+
+**push rotary push encoder + small pads 1-3** select track
+
+**shift + push rotary push encoder + small pads 1-3** toggle record for track
 
 #### Rotary encoders and faders
 
