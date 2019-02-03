@@ -45,6 +45,8 @@ Nothing special here, any generic keyboard script does the job. I just keep this
 
 **row 2-4** and **row 2-4 + shift** launch/stop clips
 
+**push rotary push encoder + pad** duplicate clip
+
 **shift + push rotary push encoder + pad** delete clip
 
 **small pads 1-4** mute tracks
