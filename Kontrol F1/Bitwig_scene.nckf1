@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <ni-controller-midi-map version="1">
-  <midi-map type="TraktorKontrolF1" name="Bitwig_session" port="internal">
+  <midi-map type="TraktorKontrolF1" name="Bitwig_scene" port="internal">
     <shiftmode>0</shiftmode>
     <wrapmode>0</wrapmode>
     <controls />
     <pages>
-      <current_index>0</current_index>
+      <current_index>1</current_index>
       <page name="Basic">
         <knob version="1" id="7Segment">
           <controller>41</controller>
