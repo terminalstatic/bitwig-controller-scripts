@@ -37,7 +37,7 @@ For the ports choose port 1 for in and out (script currently only works with one
 
 **browse** open device browser on active device/select new
 
-**push rotary push encoder + type** and **shift + push rotary push encoder + type** move effect bank forwards/backwards
+**push rotary push encoder + type** and **shift + push rotary push encoder + type** move effect bank cursor forwards/backwards
 
 #### Browser
 
