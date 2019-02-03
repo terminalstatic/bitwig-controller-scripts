@@ -4,7 +4,7 @@
 QuNexus scripts are just generic midi keyboard scripts, multi version has all channels mapped.
 Nothing special here, any generic keyboard script does the job. I just keep this for convenience.
 
-## Kontrol F1
+## Traktor Kontrol F1
 **!!This is still work in progress!!**
 
 Basically just me playing around a little with the F1 and the bitwig api, having fun blinking some lights ...
