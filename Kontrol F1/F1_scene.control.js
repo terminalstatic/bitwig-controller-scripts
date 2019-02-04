@@ -78,8 +78,6 @@ const DARK = 0
 const ON = 127
 const OFF = 0
 
-// Remove this if you want to be able to use deprecated methods without causing script to stop.
-// This is useful during development.
 host.setShouldFailOnDeprecatedUse(true);
 
 host.defineController(
@@ -113,9 +111,10 @@ if (host.platformIsWindows()) {
 
 let lastScenePressed;
 let lastSelectedBrowserColumn;
-let clipRecordPressed = false;
+let clipRecordIsPressed = false;
 let specialIsPressed = false;
 let shiftSpecialIsPressed = false;
+let clipLength = 1;
 
 function init() {
   application = host.createApplication();
@@ -131,6 +130,7 @@ function init() {
   cursorTrack = host.createCursorTrack(8, 0);
   cursorDevice = cursorTrack.createCursorDevice();
   deviceBrowser = cursorDevice.createDeviceBrowser(1, 1);
+  cursorClip = host.createLauncherCursorClip(1, 1);
 
   trackBank = host.createMainTrackBank(TRACKS_MAX_INDEX + 1, 0, SCENES_MAX_INDEX + 1);
   effectTrackBank = host.createEffectTrackBank(EFFECTS_MAX_INDEX + 1, 0)
@@ -256,6 +256,8 @@ function init() {
   }
 
   transport.isPlaying().markInterested();
+
+  sendMidi(CC_CHANNEL_13, PUSH_ROTARY_SHIFT, clipLength)
   println("F1 scene control initialized!");
 }
 
@@ -272,6 +274,13 @@ function onMidi0(status, data1, data2) {
         shiftSpecialIsPressed = true
       else
         shiftSpecialIsPressed = false
+    } else if (data1 === PUSH_ROTARY_SHIFT) {
+      if (data2 === 1 && clipLength < 127) {
+        clipLength += 1
+      } else if (clipLength > 1) {
+        clipLength -= 1
+      }
+      sendMidi(CC_CHANNEL_13, PUSH_ROTARY_SHIFT, clipLength)
     }
     printMidi(status, data1, data2);
 
@@ -292,17 +301,19 @@ function onMidi0(status, data1, data2) {
 }
 
 function flush() {
-  sendMidi(
-    CC_CHANNEL_13,
-    PUSH_ROTARY_SHIFT,
-    lastSelectedBrowserColumn === undefined ? 0 : lastSelectedBrowserColumn
-  );
+  if (popupBrowser.exists().get()) {
+    sendMidi(
+      CC_CHANNEL_13,
+      PUSH_ROTARY_SHIFT,
+      lastSelectedBrowserColumn === undefined ? 0 : lastSelectedBrowserColumn
+    );
 
-  sendMidi(
-    CC_CHANNEL_13,
-    PUSH_ROTARY,
-    lastSelectedBrowserColumn === undefined ? 0 : lastSelectedBrowserColumn
-  );
+    sendMidi(
+      CC_CHANNEL_13,
+      PUSH_ROTARY,
+      lastSelectedBrowserColumn === undefined ? 0 : lastSelectedBrowserColumn
+    );
+  }
 
   if (transport.isPlaying().get()) {
     sendMidi(CC_CHANNEL_13, PLAY_BUTTON, ON);
@@ -548,12 +559,7 @@ function handleClips(status, data1, data2) {
         .getItemAt(parseInt(pnum / 4))
         .clipLauncherSlotBank()
         .duplicateClip(pnum % 4);
-    } else if (shiftSpecialIsPressed) {
-      trackBank
-        .getItemAt(parseInt(pnum / 4))
-        .clipLauncherSlotBank()
-        .deleteClip(pnum % 4);
-    } else if (clipRecordPressed) {
+    } else if (clipRecordIsPressed) {
       if (getClipFromTrackBank(pnum)
         .isRecording()
         .get() || getClipFromTrackBank(pnum)
@@ -590,17 +596,26 @@ function handleClips(status, data1, data2) {
     return true;
   } else if (data1 >= CLIP_START_CC_SHIFT && data1 <= CLIP_END_CC_SHIFT && data2 > 0) {
     let pnum = data1 - CLIP_START_CC_SHIFT;
-    if (specialIsPressed) {
+    if (shiftSpecialIsPressed && !clipRecordIsPressed) {
+      if (getClipFromTrackBank(pnum)
+        .hasContent().get()) {
+        trackBank
+          .getItemAt(parseInt(pnum / 4))
+          .clipLauncherSlotBank()
+          .deleteClip(pnum % 4);
+      } else {
+        trackBank
+          .getItemAt(parseInt(pnum / 4))
+          .clipLauncherSlotBank()
+          .createEmptyClip(pnum % 4, clipLength);
+      }
+    } else if (clipRecordIsPressed && shiftSpecialIsPressed) {
       trackBank
         .getItemAt(parseInt(pnum / 4))
         .clipLauncherSlotBank()
-        .duplicateClip(pnum % 4);
-    } else if (shiftSpecialIsPressed) {
-      trackBank
-        .getItemAt(parseInt(pnum / 4))
-        .clipLauncherSlotBank()
-        .deleteClip(pnum % 4);
-    } else if (clipRecordPressed) {
+        .select(pnum % 4);
+      cursorClip.duplicateContent();
+    } else if (clipRecordIsPressed) {
       if (getClipFromTrackBank(pnum)
         .isRecording()
         .get() || getClipFromTrackBank(pnum)
@@ -637,10 +652,10 @@ function handleClips(status, data1, data2) {
     return true;
   } else if (data1 === CLIP_RECORD_BUTTON) {
     if (data2 > 0) {
-      clipRecordPressed = true
+      clipRecordIsPressed = true
       sendMidi(CC_CHANNEL_13, data1, ON)
     } else {
-      clipRecordPressed = false
+      clipRecordIsPressed = false
       sendMidi(CC_CHANNEL_13, data1, OFF)
     }
     return true;

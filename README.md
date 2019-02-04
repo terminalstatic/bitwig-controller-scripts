@@ -24,8 +24,6 @@ For the ports choose port 1 for in and out (script currently only works with one
 
 **quant** Toggles arranger & arranger automation record
 
-**shift + quant + clip pad** if playing toggles clip recording 
-
 **capture** toggle arranger automation
 
 **shift + capture** toggle clip overdub and automation overdub
@@ -58,9 +56,15 @@ For the ports choose port 1 for in and out (script currently only works with one
 
 **row 2-4** and **shift + row 2-4** launch/stop clips
 
+**shift + quant + clip pad** if playing toggles clip recording 
+
+**shift + push rotary push encoder + quant + clip pad** duplicate clip content
+
 **push rotary push encoder + pad** duplicate clip
 
-**shift + push rotary push encoder + pad** delete clip
+**shift + rotary push encoder** set empty clip length, default 1
+
+**shift + push rotary push encoder + pad** delete clip if clip exists, create empty clip if clip doesn't exist
 
 **small pads 1-3** mute tracks
 

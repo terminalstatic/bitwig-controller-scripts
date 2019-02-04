@@ -79,7 +79,7 @@ let seqPageIndex = 0;
 function init() {
     transport = host.createTransport();
 
-    noteIn = host.getMidiInPort(0).createNoteInput("", "?9????");
+    noteIn = host.getMidiInPort(0).createNoteInput("", "?D????");
     noteIn.setShouldConsumeEvents(false);
     noteIn.setVelocityTranslationTable(initArray(velocity, 128))
     notesInit(noteTable)
