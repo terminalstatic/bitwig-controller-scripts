@@ -17,6 +17,7 @@ Copy Kontrol F1 dir into bitwigs controller scripts dir, open and select Bitwig_
 For the ports choose port 1 for in and out (script currently only works with one F1 device).
 
 #### Buttons
+---
 **sync** toggle play
 
 **shift + sync** Pressed while playing stops, pressed when stopped resets track position to 1.1.1.00
@@ -33,14 +34,14 @@ For the ports choose port 1 for in and out (script currently only works with one
 
 **type** and **shift + type** move track cursor forward/backwards
 
+**push rotary push encoder + type** and **shift + push rotary push encoder + type** move effect bank cursor forwards/backwards
+
 **size** and **shift + size** undo/redo
 
 **browse** open device browser on active device/select new
 
-**push rotary push encoder + type** and **shift + push rotary push encoder + type** move effect bank cursor forwards/backwards
-
 #### Browser
-
+---
 **rotary push encoder** move next/prev in column
 
 **shift + rotary push encoder** move next/prev column
@@ -50,7 +51,7 @@ For the ports choose port 1 for in and out (script currently only works with one
 **browse** exit browser without selecting an item
 
 #### Pads
-
+---
 **top row pads** and **shift + top row pads** launch scene
 
 **row 2-4** and **shift + row 2-4** launch/stop clips
@@ -72,7 +73,7 @@ For the ports choose port 1 for in and out (script currently only works with one
 **shift + push rotary push encoder + small pads 1-3** toggle record for track
 
 #### Rotary encoders and faders
-
+---
 **rotary encoders 1-3** track pan
 
 **shift + rotary encoders 1-4** effect pan
@@ -87,6 +88,4 @@ For the ports choose port 1 for in and out (script currently only works with one
 
 **push rotary push encoder + rotary encoder 1 - 4** control current track sends 1 - 4
 
-
-
-
+**push rotary push encoder + fader 1 - 4** control current track sends 5 - 8

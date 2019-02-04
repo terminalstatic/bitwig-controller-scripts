@@ -68,7 +68,7 @@ const UNDO_BUTTON_SHIFT = 72
 
 const SCENES_MAX_INDEX = 3;
 const TRACKS_MAX_INDEX = 2;
-const EFFECTS_MAX_INDEX = 3
+const EFFECTS_MAX_INDEX = 3;
 
 const BRIGHT = 127
 const DIM = 48
@@ -128,12 +128,17 @@ function init() {
   transport.isClipLauncherAutomationWriteEnabled().markInterested();
 
   masterTrack = host.createMasterTrack(0);
-  cursorTrack = host.createCursorTrack(4, 0);
+  cursorTrack = host.createCursorTrack(8, 0);
   cursorDevice = cursorTrack.createCursorDevice();
   deviceBrowser = cursorDevice.createDeviceBrowser(1, 1);
 
   trackBank = host.createMainTrackBank(TRACKS_MAX_INDEX + 1, 0, SCENES_MAX_INDEX + 1);
   effectTrackBank = host.createEffectTrackBank(EFFECTS_MAX_INDEX + 1, 0)
+
+  for (let i = 0; i <= EFFECTS_MAX_INDEX; i++) {
+    effectTrackBank.getItemAt(i).name().markInterested()
+  }
+
   popupBrowser = host.createPopupBrowser();
 
   masterTrack.volume().markInterested();
@@ -650,9 +655,11 @@ function handleNav(status, data1, data2) {
     return true;
   } else if (data1 === NEXT_TRACK_BUTTON && data2 > 0 && specialIsPressed) {
     effectTrackBank.scrollForwards();
+    host.showPopupNotification(effectTrackBank.getItemAt(0).name().get() + " - " + effectTrackBank.getItemAt(3).name().get())
     return true;
   } else if (data1 === PREV_TRACK_BUTTON && data2 > 0 && shiftSpecialIsPressed) {
     effectTrackBank.scrollBackwards();
+    host.showPopupNotification(effectTrackBank.getItemAt(0).name().get() + " - " + effectTrackBank.getItemAt(3).name().get())
     return true;
   } else if (data1 === PREV_TRACK_BUTTON && data2 > 0 && !shiftSpecialIsPressed) {
     cursorTrack.selectPrevious();
@@ -680,13 +687,13 @@ function handleApplication(status, data1, data2) {
 }
 
 function handleChannels(status, data1, data2) {
-  if (data1 === VOLUME_SLIDER_MASTER) {
+  if (data1 === VOLUME_SLIDER_MASTER && !specialIsPressed) {
     masterTrack.volume().set(data2, 128);
     return true;
   } else if (data1 === PAN_ROTARY_MASTER && !specialIsPressed) {
     masterTrack.pan().set(data2, 128);
     return true;
-  } else if (data1 >= VOLUME_SLIDERS_START && data1 <= VOLUME_SLIDERS_END) {
+  } else if (data1 >= VOLUME_SLIDERS_START && data1 <= VOLUME_SLIDERS_END && !specialIsPressed) {
     trackBank
       .getItemAt(TRACKS_MAX_INDEX - (VOLUME_SLIDERS_END - data1))
       .volume()
@@ -712,6 +719,10 @@ function handleChannels(status, data1, data2) {
     return true;
   } else if (data1 >= PAN_ROTARY_START && data1 <= PAN_ROTARY_END + 1 && specialIsPressed) {
     cursorTrack.sendBank().getItemAt(3 - (PAN_ROTARY_END + 1 - data1)).set(data2, 128);
+    return true;
+  } else if (data1 >= VOLUME_SLIDERS_START && data1 <= VOLUME_SLIDERS_END + 1 && specialIsPressed) {
+    println((7 - (VOLUME_SLIDERS_END + 1 - data1)));
+    cursorTrack.sendBank().getItemAt(7 - (VOLUME_SLIDERS_END + 1 - data1)).set(data2, 128);
     return true;
   } else if (data1 >= MUTE_AND_SOLO_START && data1 <= MUTE_AND_SOLO_END && specialIsPressed) {
     trackBank.getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END - data1)).select()
