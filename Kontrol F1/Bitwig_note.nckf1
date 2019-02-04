@@ -1,15 +1,15 @@
 <?xml version="1.0"?>
 <ni-controller-midi-map version="1">
   <midi-map type="TraktorKontrolF1" name="Bitwig_note" port="internal">
-    <shiftmode>0</shiftmode>
+    <shiftmode>1</shiftmode>
     <wrapmode>0</wrapmode>
     <controls />
     <pages>
-      <current_index>0</current_index>
+      <current_index>1</current_index>
       <page name="Basic">
         <knob version="1" id="7Segment">
           <controller>41</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <min>0</min>
           <max>127</max>
           <default>0</default>
@@ -23,7 +23,7 @@
         </knob>
         <button version="1" id="Browse">
           <controller>32</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior>trigger</behavior>
@@ -31,7 +31,7 @@
         </button>
         <button version="1" id="Capture">
           <controller>28</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior>trigger</behavior>
@@ -39,7 +39,7 @@
         </button>
         <button version="1" id="DialPush">
           <controller>42</controller>
-          <channel>12</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior>gate</behavior>
@@ -47,7 +47,7 @@
         </button>
         <wheel version="1" id="DialTurn">
           <controller mode="comp">41</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <min>0</min>
           <max>127</max>
           <default>0</default>
@@ -55,7 +55,7 @@
         </wheel>
         <knob version="1" id="Filter1">
           <controller>2</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <min>0</min>
           <max>127</max>
           <default>0</default>
@@ -65,7 +65,7 @@
         </knob>
         <knob version="1" id="Filter2">
           <controller>3</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <min>0</min>
           <max>127</max>
           <default>0</default>
@@ -75,7 +75,7 @@
         </knob>
         <knob version="1" id="Filter3">
           <controller>4</controller>
-          <channel>8</channel>
+          <channel>13</channel>
           <min>0</min>
           <max>127</max>
           <default>0</default>
@@ -85,7 +85,7 @@
         </knob>
         <knob version="1" id="Filter4">
           <controller>5</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <min>0</min>
           <max>127</max>
           <default>0</default>
@@ -95,7 +95,7 @@
         </knob>
         <button version="1" id="Mute1">
           <controller>37</controller>
-          <channel>9</channel>
+          <channel>12</channel>
           <off>0</off>
           <on>127</on>
           <behavior>trigger</behavior>
@@ -103,7 +103,7 @@
         </button>
         <button version="1" id="Mute2">
           <controller>38</controller>
-          <channel>9</channel>
+          <channel>12</channel>
           <off>0</off>
           <on>127</on>
           <behavior>trigger</behavior>
@@ -111,7 +111,7 @@
         </button>
         <button version="1" id="Mute3">
           <controller>39</controller>
-          <channel>9</channel>
+          <channel>12</channel>
           <off>0</off>
           <on>127</on>
           <behavior>trigger</behavior>
@@ -119,7 +119,7 @@
         </button>
         <button version="1" id="Mute4">
           <controller>40</controller>
-          <channel>9</channel>
+          <channel>12</channel>
           <off>0</off>
           <on>127</on>
           <behavior>trigger</behavior>
@@ -127,7 +127,7 @@
         </button>
         <button version="1" id="PadA1">
           <note>48</note>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior onIfDown="on">gate</behavior>
@@ -165,7 +165,7 @@
         </led>
         <button version="1" id="PadA2">
           <note>49</note>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior onIfDown="on">gate</behavior>
@@ -203,7 +203,7 @@
         </led>
         <button version="1" id="PadA3">
           <note>50</note>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior onIfDown="on">gate</behavior>
@@ -241,7 +241,7 @@
         </led>
         <button version="1" id="PadA4">
           <note>51</note>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior onIfDown="on">gate</behavior>
@@ -279,7 +279,7 @@
         </led>
         <button version="1" id="PadB1">
           <note>44</note>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior onIfDown="on">gate</behavior>
@@ -317,7 +317,7 @@
         </led>
         <button version="1" id="PadB2">
           <note>45</note>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior onIfDown="on">gate</behavior>
@@ -355,7 +355,7 @@
         </led>
         <button version="1" id="PadB3">
           <note>46</note>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior onIfDown="on">gate</behavior>
@@ -393,7 +393,7 @@
         </led>
         <button version="1" id="PadB4">
           <note>47</note>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior onIfDown="on">gate</behavior>
@@ -431,7 +431,7 @@
         </led>
         <button version="1" id="PadC1">
           <note>40</note>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior onIfDown="on">gate</behavior>
@@ -469,7 +469,7 @@
         </led>
         <button version="1" id="PadC2">
           <note>41</note>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior onIfDown="on">gate</behavior>
@@ -507,7 +507,7 @@
         </led>
         <button version="1" id="PadC3">
           <note>42</note>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior onIfDown="on">gate</behavior>
@@ -545,7 +545,7 @@
         </led>
         <button version="1" id="PadC4">
           <note>43</note>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior onIfDown="on">gate</behavior>
@@ -583,7 +583,7 @@
         </led>
         <button version="1" id="PadD1">
           <note>36</note>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior onIfDown="on">gate</behavior>
@@ -621,7 +621,7 @@
         </led>
         <button version="1" id="PadD2">
           <note>37</note>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior onIfDown="on">gate</behavior>
@@ -659,7 +659,7 @@
         </led>
         <button version="1" id="PadD3">
           <note>38</note>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior onIfDown="on">gate</behavior>
@@ -697,7 +697,7 @@
         </led>
         <button version="1" id="PadD4">
           <note>39</note>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior onIfDown="on">gate</behavior>
@@ -735,7 +735,7 @@
         </led>
         <button version="1" id="Quant">
           <controller>27</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior>trigger</behavior>
@@ -743,7 +743,7 @@
         </button>
         <button version="1" id="Reverse">
           <controller>29</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior onIfDown="on">gate</behavior>
@@ -751,7 +751,7 @@
         </button>
         <button version="1" id="Size">
           <controller>31</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior onIfDown="on">trigger</behavior>
@@ -759,7 +759,7 @@
         </button>
         <button version="1" id="Sync">
           <controller>26</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior>trigger</behavior>
@@ -767,7 +767,7 @@
         </button>
         <button version="1" id="Type">
           <controller>30</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior onIfDown="on">gate</behavior>
@@ -775,7 +775,7 @@
         </button>
         <knob version="1" id="Volume1">
           <controller>6</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <min>0</min>
           <max>127</max>
           <default>0</default>
@@ -785,7 +785,7 @@
         </knob>
         <knob version="1" id="Volume2">
           <controller>7</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <min>0</min>
           <max>127</max>
           <default>0</default>
@@ -795,7 +795,7 @@
         </knob>
         <knob version="1" id="Volume3">
           <controller>8</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <min>0</min>
           <max>127</max>
           <default>0</default>
@@ -805,7 +805,7 @@
         </knob>
         <knob version="1" id="Volume4">
           <controller>9</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <min>0</min>
           <max>127</max>
           <default>0</default>
@@ -817,7 +817,7 @@
       <page name="Shift">
         <knob version="1" id="7Segment">
           <controller>78</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <min>0</min>
           <max>127</max>
           <default>0</default>
@@ -831,7 +831,7 @@
         </knob>
         <button version="1" id="Browse">
           <controller>73</controller>
-          <channel>12</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior>gate</behavior>
@@ -839,7 +839,7 @@
         </button>
         <button version="1" id="Capture">
           <controller>69</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior>trigger</behavior>
@@ -847,7 +847,7 @@
         </button>
         <button version="1" id="DialPush">
           <controller>79</controller>
-          <channel>12</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior>gate</behavior>
@@ -855,14 +855,14 @@
         </button>
         <wheel version="1" id="DialTurn">
           <controller mode="comp">78</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <min>0</min>
           <max>127</max>
           <default>0</default>
         </wheel>
         <knob version="1" id="Filter1">
           <controller>43</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <min>0</min>
           <max>127</max>
           <default>0</default>
@@ -872,7 +872,7 @@
         </knob>
         <knob version="1" id="Filter2">
           <controller>44</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <min>0</min>
           <max>127</max>
           <default>0</default>
@@ -882,7 +882,7 @@
         </knob>
         <knob version="1" id="Filter3">
           <controller>45</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <min>0</min>
           <max>127</max>
           <default>0</default>
@@ -892,7 +892,7 @@
         </knob>
         <knob version="1" id="Filter4">
           <controller>46</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <min>0</min>
           <max>127</max>
           <default>0</default>
@@ -902,39 +902,39 @@
         </knob>
         <button version="1" id="Mute1">
           <controller>74</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
-          <behavior>trigger</behavior>
+          <behavior onIfDown="on">trigger</behavior>
           <reaction>ondown</reaction>
         </button>
         <button version="1" id="Mute2">
           <controller>75</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
-          <behavior>trigger</behavior>
+          <behavior onIfDown="on">trigger</behavior>
           <reaction>ondown</reaction>
         </button>
         <button version="1" id="Mute3">
           <controller>76</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
-          <behavior>trigger</behavior>
+          <behavior onIfDown="on">trigger</behavior>
           <reaction>ondown</reaction>
         </button>
         <button version="1" id="Mute4">
           <controller>77</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
-          <behavior>trigger</behavior>
+          <behavior onIfDown="on">trigger</behavior>
           <reaction>ondown</reaction>
         </button>
         <button version="1" id="PadA1">
           <controller>51</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior>trigger</behavior>
@@ -972,7 +972,7 @@
         </led>
         <button version="1" id="PadA2">
           <controller>52</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior>trigger</behavior>
@@ -1010,7 +1010,7 @@
         </led>
         <button version="1" id="PadA3">
           <controller>53</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior>trigger</behavior>
@@ -1048,7 +1048,7 @@
         </led>
         <button version="1" id="PadA4">
           <controller>54</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior>trigger</behavior>
@@ -1086,7 +1086,7 @@
         </led>
         <button version="1" id="PadB1">
           <controller>55</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior>trigger</behavior>
@@ -1124,7 +1124,7 @@
         </led>
         <button version="1" id="PadB2">
           <controller>56</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior>trigger</behavior>
@@ -1162,7 +1162,7 @@
         </led>
         <button version="1" id="PadB3">
           <controller>57</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior>trigger</behavior>
@@ -1200,7 +1200,7 @@
         </led>
         <button version="1" id="PadB4">
           <controller>58</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior>trigger</behavior>
@@ -1238,7 +1238,7 @@
         </led>
         <button version="1" id="PadC1">
           <controller>59</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior>trigger</behavior>
@@ -1276,7 +1276,7 @@
         </led>
         <button version="1" id="PadC2">
           <controller>60</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior>trigger</behavior>
@@ -1314,7 +1314,7 @@
         </led>
         <button version="1" id="PadC3">
           <controller>61</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior>trigger</behavior>
@@ -1352,7 +1352,7 @@
         </led>
         <button version="1" id="PadC4">
           <controller>62</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior>trigger</behavior>
@@ -1390,7 +1390,7 @@
         </led>
         <button version="1" id="PadD1">
           <controller>63</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior>trigger</behavior>
@@ -1428,7 +1428,7 @@
         </led>
         <button version="1" id="PadD2">
           <controller>64</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior>trigger</behavior>
@@ -1466,7 +1466,7 @@
         </led>
         <button version="1" id="PadD3">
           <controller>65</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior>trigger</behavior>
@@ -1504,7 +1504,7 @@
         </led>
         <button version="1" id="PadD4">
           <controller>66</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior>trigger</behavior>
@@ -1542,7 +1542,7 @@
         </led>
         <button version="1" id="Quant">
           <controller>68</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior>gate</behavior>
@@ -1550,7 +1550,7 @@
         </button>
         <button version="1" id="Reverse">
           <controller>70</controller>
-          <channel>12</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior onIfDown="on">gate</behavior>
@@ -1558,7 +1558,7 @@
         </button>
         <button version="1" id="Size">
           <controller>72</controller>
-          <channel>12</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior onIfDown="on">trigger</behavior>
@@ -1566,7 +1566,7 @@
         </button>
         <button version="1" id="Sync">
           <controller>67</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior onIfDown="on">trigger</behavior>
@@ -1574,7 +1574,7 @@
         </button>
         <button version="1" id="Type">
           <controller>71</controller>
-          <channel>12</channel>
+          <channel>13</channel>
           <off>0</off>
           <on>127</on>
           <behavior onIfDown="on">gate</behavior>
@@ -1582,7 +1582,7 @@
         </button>
         <knob version="1" id="Volume1">
           <controller>47</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <min>0</min>
           <max>127</max>
           <default>0</default>
@@ -1592,7 +1592,7 @@
         </knob>
         <knob version="1" id="Volume2">
           <controller>48</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <min>0</min>
           <max>127</max>
           <default>0</default>
@@ -1602,7 +1602,7 @@
         </knob>
         <knob version="1" id="Volume3">
           <controller>49</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <min>0</min>
           <max>127</max>
           <default>0</default>
@@ -1612,7 +1612,7 @@
         </knob>
         <knob version="1" id="Volume4">
           <controller>50</controller>
-          <channel>9</channel>
+          <channel>13</channel>
           <min>0</min>
           <max>127</max>
           <default>0</default>

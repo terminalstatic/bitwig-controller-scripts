@@ -7,7 +7,7 @@ const BRIGHTNESS = 178;
 const LOWEST_CC = 1;
 const HIGHEST_CC = 119;
 
-const CHANNEL_10 = 185
+const CHANNEL_14 = 189
 
 const PLAY_BUTTON = 26;
 const PLAY_BUTTON_SHIFT = 67;
@@ -92,7 +92,7 @@ function init() {
         userControls.getControl(i - LOWEST_CC).setLabel("CC" + i);
     }
 
-    sendMidi(CHANNEL_10, VELOCITY_OFFSET_ROTARY, velocity)
+    sendMidi(CHANNEL_14, VELOCITY_OFFSET_ROTARY, velocity)
 
     cursorTrack = host.createCursorTrack(0, 0);
 
@@ -166,13 +166,13 @@ function onMidi0(status, data1, data2) {
                 if (velocity > 0) {
                     velocity--;
                     noteIn.setVelocityTranslationTable(initArray(velocity, 128))
-                    sendMidi(CHANNEL_10, data1, velocity)
+                    sendMidi(CHANNEL_14, data1, velocity)
                 }
             } else if (data2 === 1) {
                 if (velocity < 127) {
                     velocity++;
                     noteIn.setVelocityTranslationTable(initArray(velocity, 128))
-                    sendMidi(CHANNEL_10, data1, velocity)
+                    sendMidi(CHANNEL_14, data1, velocity)
                 }
 
             }
@@ -180,13 +180,13 @@ function onMidi0(status, data1, data2) {
             if (data2 === 127) {
                 if (noteOffset > -36) {
                     noteOffset--
-                    sendMidi(CHANNEL_10, VELOCITY_OFFSET_ROTARY, Math.abs(noteOffset))
+                    sendMidi(CHANNEL_14, VELOCITY_OFFSET_ROTARY, Math.abs(noteOffset))
                     setNoteTable(noteIn, noteTable, noteOffset)
                 }
             } else if (data2 === 1) {
                 if (noteOffset < 80) {
                     noteOffset++
-                    sendMidi(CHANNEL_10, VELOCITY_OFFSET_ROTARY, Math.abs(noteOffset))
+                    sendMidi(CHANNEL_14, VELOCITY_OFFSET_ROTARY, Math.abs(noteOffset))
                     setNoteTable(noteIn, noteTable, noteOffset)
                 }
             }
@@ -200,7 +200,7 @@ function onMidi0(status, data1, data2) {
                     currentSeqNote++;
                 }
             }
-            sendMidi(CHANNEL_10, SEQ_PUSH_ROTARY, Math.abs(noteOffset))
+            sendMidi(CHANNEL_14, SEQ_PUSH_ROTARY, Math.abs(noteOffset))
             host.showPopupNotification(notesText[currentSeqNote % 12] + (parseInt(currentSeqNote / 12) - 2))
         } else if (data1 === SEQ_VELOCITY_NOTE_ROTARY && isSeqPushed === false) {
             if (data2 === 127) {

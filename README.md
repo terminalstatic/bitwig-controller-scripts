@@ -38,7 +38,9 @@ For the ports choose port 1 for in and out (script currently only works with one
 
 **size** and **shift + size** undo/redo
 
-**browse** open device browser on active device/select new
+**browse** open device browser on active device
+
+**push rotary push encoder + browse** open browser for insert after current device
 
 #### Browser
 ---
