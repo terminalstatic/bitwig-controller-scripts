@@ -43,7 +43,7 @@ For the ports choose port 1 for in and out (script currently only works with one
 
 **rotary push encoder** move next/prev in column
 
-**rotary push encoder + shift** move next/prev column
+**shift + rotary push encoder** move next/prev column
 
 **push rotary push encoder** select column item and exit browser
 
@@ -51,9 +51,9 @@ For the ports choose port 1 for in and out (script currently only works with one
 
 #### Pads
 
-**top row pads** and **top row pads + shift** launch scene
+**top row pads** and **shift + top row pads** launch scene
 
-**row 2-4** and **row 2-4 + shift** launch/stop clips
+**row 2-4** and **shift + row 2-4** launch/stop clips
 
 **push rotary push encoder + pad** duplicate clip
 
@@ -63,9 +63,9 @@ For the ports choose port 1 for in and out (script currently only works with one
 
 **small pad 4** mute master
 
-**small pads 1-3 + shift** solo tracks
+**shift + small pads 1-3** solo tracks
 
-**small pad 4 + shift** solo master
+**shift + small pad 4** solo master
 
 **push rotary push encoder + small pads 1-3** select track
 
@@ -75,13 +75,13 @@ For the ports choose port 1 for in and out (script currently only works with one
 
 **rotary encoders 1-3** track pan
 
-**rotary encoders 1-4 + shift** effect pan
+**shift + rotary encoders 1-4** effect pan
 
 **rotary encoder 4** master pan
 
 **faders 1-3** track volume
 
-**faders 1-4 + shift** effect volume
+**shift + faders 1-4** effect volume
 
 **fader 4** master volume
 
