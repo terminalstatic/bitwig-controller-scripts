@@ -5,7 +5,7 @@ Basically just me playing around a little with the F1 and the bitwig api, having
 ### Bitwig Scene Control
 
 #### Installation
-Download and copy F1_scene.control.js into bitwigs controller scripts dir, download and open/select Bitwig_scene.nckf1 template in native instruments controller scripts editor and don't close it, in bitwig choose settings -> controllers -> controller -> add -> Native Instruments -> Traktor Kontrol F1 Scene.
+Download and copy F1_scene.control.js into bitwigs controller scripts dir (preferrably into a subdir), download and open/select Bitwig_scene.nckf1 template in native instruments controller scripts editor and don't close it, in bitwig choose settings -> controllers -> controller -> add -> Native Instruments -> Traktor Kontrol F1 Scene.
 
 For the ports choose port 1 for in and out (script currently only works with one F1 device).
 
