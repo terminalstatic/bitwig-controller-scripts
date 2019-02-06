@@ -115,6 +115,7 @@ let clipRecordIsPressed = false;
 let specialIsPressed = false;
 let shiftSpecialIsPressed = false;
 let clipLength = 1;
+let lastEffectScrollPosition = 0;
 
 function init() {
   application = host.createApplication();
@@ -134,6 +135,7 @@ function init() {
 
   trackBank = host.createMainTrackBank(TRACKS_MAX_INDEX + 1, 0, SCENES_MAX_INDEX + 1);
   effectTrackBank = host.createEffectTrackBank(EFFECTS_MAX_INDEX + 1, 0)
+  effectTrackBank.scrollPosition().markInterested();
 
   for (let i = 0; i <= EFFECTS_MAX_INDEX; i++) {
     effectTrackBank.getItemAt(i).name().markInterested()
@@ -247,15 +249,9 @@ function init() {
 
   host.getMidiInPort(0).setMidiCallback(onMidi0);
 
-  for (let i = SCENE_START_CC; i <= CLIP_END_CC; i++) {
-    setPadColor(i, 0, 0, 0);
-  }
-
-  for (let i = SCENE_START_CC_SHIFT; i <= CLIP_END_CC_SHIFT; i++) {
-    setPadColor(i, 0, 0, 0);
-  }
-
   transport.isPlaying().markInterested();
+
+  initLightShow();
 
   sendMidi(CC_CHANNEL_13, PUSH_ROTARY_SHIFT, clipLength)
   println("F1 scene control initialized!");
@@ -301,6 +297,11 @@ function onMidi0(status, data1, data2) {
 }
 
 function flush() {
+  if (effectTrackBank.scrollPosition().get() !== lastEffectScrollPosition) {
+    host.showPopupNotification(effectTrackBank.getItemAt(0).name().get() + " - " + effectTrackBank.getItemAt(3).name().get())
+    lastEffectScrollPosition = effectTrackBank.scrollPosition().get()
+  }
+
   if (popupBrowser.exists().get()) {
     sendMidi(
       CC_CHANNEL_13,
@@ -500,12 +501,26 @@ function flush() {
 }
 
 function exit() {
+  initLightShow();
+}
+
+function initLightShow() {
+  sendMidi(CC_CHANNEL_13, PLAY_BUTTON, OFF);
+  sendMidi(CC_CHANNEL_13, ARRANGER_RECORD_BUTTON, OFF);
+  sendMidi(CC_CHANNEL_13, ARRANGER_AUTOMATION, OFF);
+  sendMidi(CC_CHANNEL_13, CLIP_AUTOMATION_AND_OVERWRITE, OFF);
+  sendMidi(CC_CHANNEL_13, BROWSE_BUTTON, OFF);
+
   for (let i = SCENE_START_CC; i <= CLIP_END_CC; i++) {
     setPadColor(i, 0, 0, 0);
   }
 
   for (let i = SCENE_START_CC_SHIFT; i <= CLIP_END_CC_SHIFT; i++) {
     setPadColor(i, 0, 0, 0);
+  }
+
+  for (let i = MUTE_AND_SOLO_START_SHIFT; i <= MUTE_AND_SOLO_END_SHIFT; i++) {
+    sendMidi(CC_CHANNEL_13, i, OFF);
   }
 }
 
@@ -669,12 +684,12 @@ function handleNav(status, data1, data2) {
     trackBank.scrollForwards();
     return true;
   } else if (data1 === NEXT_TRACK_BUTTON && data2 > 0 && specialIsPressed) {
+    println("forwards")
     effectTrackBank.scrollForwards();
-    host.showPopupNotification(effectTrackBank.getItemAt(0).name().get() + " - " + effectTrackBank.getItemAt(3).name().get())
+
     return true;
   } else if (data1 === PREV_TRACK_BUTTON && data2 > 0 && shiftSpecialIsPressed) {
     effectTrackBank.scrollBackwards();
-    host.showPopupNotification(effectTrackBank.getItemAt(0).name().get() + " - " + effectTrackBank.getItemAt(3).name().get())
     return true;
   } else if (data1 === PREV_TRACK_BUTTON && data2 > 0 && !shiftSpecialIsPressed) {
     cursorTrack.selectPrevious();
