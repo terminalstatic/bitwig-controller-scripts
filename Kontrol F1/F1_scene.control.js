@@ -116,6 +116,9 @@ let specialIsPressed = false;
 let shiftSpecialIsPressed = false;
 let clipLength = 1;
 let lastEffectScrollPosition = 0;
+let lastDisplayValue = 0;
+let lastShiftDisplayValue = 0;
+let initFlush = true;
 
 function init() {
   application = host.createApplication();
@@ -129,16 +132,43 @@ function init() {
 
   masterTrack = host.createMasterTrack(0);
   cursorTrack = host.createCursorTrack(8, 0);
+
+  for (let i = 0; i < 8; i++) {
+    cursorTrack.sendBank().getItemAt(i).value().addValueObserver(128, function (v) {
+      sendMidi(CC_CHANNEL_13, PUSH_ROTARY, v);
+      lastDisplayValue = v;
+    });
+  }
   cursorDevice = cursorTrack.createCursorDevice();
   deviceBrowser = cursorDevice.createDeviceBrowser(1, 1);
   cursorClip = host.createLauncherCursorClip(1, 1);
 
   trackBank = host.createMainTrackBank(TRACKS_MAX_INDEX + 1, 0, SCENES_MAX_INDEX + 1);
+
+  for (let i = 0; i <= TRACKS_MAX_INDEX; i++) {
+    trackBank.getItemAt(i).volume().value().addValueObserver(128, function (v) {
+      sendMidi(CC_CHANNEL_13, PUSH_ROTARY, v);
+      lastDisplayValue = v;
+    });
+    trackBank.getItemAt(i).pan().value().addValueObserver(128, function (v) {
+      sendMidi(CC_CHANNEL_13, PUSH_ROTARY, v);
+      lastDisplayValue = v;
+    })
+  }
+
   effectTrackBank = host.createEffectTrackBank(EFFECTS_MAX_INDEX + 1, 0)
   effectTrackBank.scrollPosition().markInterested();
 
   for (let i = 0; i <= EFFECTS_MAX_INDEX; i++) {
     effectTrackBank.getItemAt(i).name().markInterested()
+    effectTrackBank.getItemAt(i).volume().value().addValueObserver(128, function (v) {
+      sendMidi(CC_CHANNEL_13, PUSH_ROTARY_SHIFT, v);
+      lastShiftDisplayValue = v;
+    });
+    effectTrackBank.getItemAt(i).pan().value().addValueObserver(128, function (v) {
+      sendMidi(CC_CHANNEL_13, PUSH_ROTARY_SHIFT, v);
+      lastShiftDisplayValue = v;
+    })
   }
 
   popupBrowser = host.createPopupBrowser();
@@ -148,6 +178,15 @@ function init() {
   masterTrack.mute().markInterested();
   masterTrack.solo().markInterested();
   masterTrack.arm().markInterested();
+
+  masterTrack.volume().value().addValueObserver(128, function (v) {
+    sendMidi(CC_CHANNEL_13, PUSH_ROTARY, v);
+    lastDisplayValue = v;
+  })
+  masterTrack.pan().value().addValueObserver(128, function (v) {
+    sendMidi(CC_CHANNEL_13, PUSH_ROTARY, v);
+  })
+
 
   popupBrowser.exists().markInterested();
   popupBrowser.selectedContentTypeIndex().markInterested();
@@ -267,10 +306,13 @@ function onMidi0(status, data1, data2) {
       else
         specialIsPressed = false
     } else if (data1 === PUSH_ROTARY_PUSH_SHIFT && !popupBrowser.exists().get()) {
-      if (data2 === 127)
+      if (data2 === 127) {
         shiftSpecialIsPressed = true
-      else
+        sendMidi(CC_CHANNEL_13, PUSH_ROTARY_SHIFT, clipLength)
+      } else {
         shiftSpecialIsPressed = false
+        sendMidi(CC_CHANNEL_13, PUSH_ROTARY_SHIFT, lastShiftDisplayValue)
+      }
     } else if (data1 === PUSH_ROTARY_SHIFT) {
       if (data2 === 1 && clipLength < 127) {
         clipLength += 1
@@ -298,23 +340,14 @@ function onMidi0(status, data1, data2) {
 }
 
 function flush() {
+  if (initFlush) {
+    sendMidi(CC_CHANNEL_13, PUSH_ROTARY, 0);
+    sendMidi(CC_CHANNEL_13, PUSH_ROTARY_SHIFT, 0);
+    initFlush = false;
+  }
   if (effectTrackBank.scrollPosition().get() !== lastEffectScrollPosition) {
     host.showPopupNotification(effectTrackBank.getItemAt(0).name().get() + " - " + effectTrackBank.getItemAt(3).name().get())
     lastEffectScrollPosition = effectTrackBank.scrollPosition().get()
-  }
-
-  if (popupBrowser.exists().get()) {
-    sendMidi(
-      CC_CHANNEL_13,
-      PUSH_ROTARY_SHIFT,
-      lastSelectedBrowserColumn === undefined ? 0 : lastSelectedBrowserColumn
-    );
-
-    sendMidi(
-      CC_CHANNEL_13,
-      PUSH_ROTARY,
-      lastSelectedBrowserColumn === undefined ? 0 : lastSelectedBrowserColumn
-    );
   }
 
   if (transport.isPlaying().get()) {
@@ -689,9 +722,7 @@ function handleNav(status, data1, data2) {
     trackBank.scrollForwards();
     return true;
   } else if (data1 === NEXT_TRACK_BUTTON && data2 > 0 && specialIsPressed) {
-    println("forwards")
     effectTrackBank.scrollForwards();
-
     return true;
   } else if (data1 === PREV_TRACK_BUTTON && data2 > 0 && shiftSpecialIsPressed) {
     effectTrackBank.scrollBackwards();
@@ -836,6 +867,16 @@ function handleChannels(status, data1, data2) {
 function handleBrowser(status, data1, data2) {
   if (data1 === BROWSE_BUTTON && specialIsPressed && !popupBrowser.exists().get()) {
     cursorDevice.afterDeviceInsertionPoint().browse()
+    sendMidi(
+      CC_CHANNEL_13,
+      PUSH_ROTARY_SHIFT,
+      lastSelectedBrowserColumn === undefined ? 0 : lastSelectedBrowserColumn + 1
+    );
+    sendMidi(
+      CC_CHANNEL_13,
+      PUSH_ROTARY,
+      lastSelectedBrowserColumn === undefined ? 0 : lastSelectedBrowserColumn + 1
+    );
     //deviceBrowser.startBrowsing();
     //deviceBrowser.activateSession(deviceBrowser.getDeviceSession());
     return true;
@@ -843,9 +884,22 @@ function handleBrowser(status, data1, data2) {
     //deviceBrowser.startBrowsing();
     //deviceBrowser.activateSession(deviceBrowser.getDeviceSession());
     cursorDevice.createDeviceBrowser(1, 1).startBrowsing()
+    cursorDevice.afterDeviceInsertionPoint().browse()
+    sendMidi(
+      CC_CHANNEL_13,
+      PUSH_ROTARY_SHIFT,
+      lastSelectedBrowserColumn === undefined ? 1 : lastSelectedBrowserColumn + 1
+    );
+    sendMidi(
+      CC_CHANNEL_13,
+      PUSH_ROTARY,
+      lastSelectedBrowserColumn === undefined ? 1 : lastSelectedBrowserColumn + 1
+    );
     return true;
   } else if (data1 === BROWSE_BUTTON && popupBrowser.exists().get()) {
     popupBrowser.cancel();
+    sendMidi(CC_CHANNEL_13, PUSH_ROTARY, lastDisplayValue);
+    sendMidi(CC_CHANNEL_13, PUSH_ROTARY_SHIFT, lastShiftDisplayValue);
     return true;
   } else if (data1 === PUSH_ROTARY && popupBrowser.exists().get()) {
     if (data2 === 1) {
@@ -920,20 +974,24 @@ function handleBrowser(status, data1, data2) {
     sendMidi(
       CC_CHANNEL_13,
       PUSH_ROTARY_SHIFT,
-      lastSelectedBrowserColumn === undefined ? 0 : lastSelectedBrowserColumn
+      lastSelectedBrowserColumn === undefined ? 1 : lastSelectedBrowserColumn + 1
     );
 
     sendMidi(
       CC_CHANNEL_13,
       PUSH_ROTARY,
-      lastSelectedBrowserColumn === undefined ? 0 : lastSelectedBrowserColumn
+      lastSelectedBrowserColumn === undefined ? 1 : lastSelectedBrowserColumn + 1
     );
     return true;
   } else if (data1 === PUSH_ROTARY_PUSH && data2 > 0 && popupBrowser.exists().get()) {
     popupBrowser.commit();
+    sendMidi(CC_CHANNEL_13, PUSH_ROTARY, lastDisplayValue);
+    sendMidi(CC_CHANNEL_13, PUSH_ROTARY_SHIFT, lastShiftDisplayValue);
     return true;
   } else if (data1 === PUSH_ROTARY_PUSH_SHIFT && popupBrowser.exists().get()) {
     popupBrowser.cancel();
+    sendMidi(CC_CHANNEL_13, PUSH_ROTARY, lastDisplayValue);
+    sendMidi(CC_CHANNEL_13, PUSH_ROTARY_SHIFT, lastShiftDisplayValue);
     return true;
   }
   return false;
