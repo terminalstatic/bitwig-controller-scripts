@@ -227,64 +227,28 @@ function init() {
   trackBank.channelScrollPosition().markInterested();
 
   for (let i = 0; i < SCENES_MAX_INDEX + 1; i++) {
-    trackBank
-      .sceneBank()
-      .getScene(i)
-      .color()
-      .markInterested();
-    trackBank
-      .sceneBank()
-      .getScene(i)
-      .sceneIndex()
-      .markInterested()
+    trackBank.sceneBank().getScene(i).color().markInterested();
+    trackBank.sceneBank().getScene(i).sceneIndex().markInterested()
   }
 
   for (let i = 0; i < TRACKS_MAX_INDEX + 1; i++) {
-    trackBank
-      .getItemAt(i)
-      .name()
-      .markInterested();
-    trackBank
-      .getItemAt(i)
-      .mute()
-      .markInterested();
-    trackBank
-      .getItemAt(i)
-      .solo()
-      .markInterested();
-    trackBank
-      .getItemAt(i)
-      .arm()
-      .markInterested();
+    trackBank.getItemAt(i).name().markInterested();
+    trackBank.getItemAt(i).mute().markInterested();
+    trackBank.getItemAt(i).solo().markInterested();
+    trackBank.getItemAt(i).arm().markInterested();
   }
 
   for (let i = 0; i < 12; i++) {
-    getClipFromTrackBank(i)
-      .color()
-      .markInterested();
-    getClipFromTrackBank(i)
-      .isPlaying()
-      .markInterested();
-    getClipFromTrackBank(i)
-      .isRecording()
-      .markInterested();
-    getClipFromTrackBank(i)
-      .isRecordingQueued()
-      .markInterested();
-    getClipFromTrackBank(i)
-      .hasContent()
-      .markInterested();
-    trackBank
-      .getItemAt(parseInt(i / 4))
-      .isGroup()
-      .markInterested();
+    getClipFromTrackBank(i).color().markInterested();
+    getClipFromTrackBank(i).isPlaying().markInterested();
+    getClipFromTrackBank(i).isRecording().markInterested();
+    getClipFromTrackBank(i).isRecordingQueued().markInterested();
+    getClipFromTrackBank(i).hasContent().markInterested();
+    trackBank.getItemAt(parseInt(i / 4)).isGroup().markInterested();
   }
 
   for (i = 0; i <= TRACKS_MAX_INDEX; i++) {
-    trackBank
-      .getItemAt(i)
-      .clipLauncherSlotBank()
-      .setIndication(true);
+    trackBank.getItemAt(i).clipLauncherSlotBank().setIndication(true);
   }
 
   host.getMidiInPort(0).setMidiCallback(onMidi0);
@@ -321,7 +285,7 @@ function onMidi0(status, data1, data2) {
       }
       sendMidi(CC_CHANNEL_13, PUSH_ROTARY_SHIFT, clipLength)
     }
-    printMidi(status, data1, data2);
+    //printMidi(status, data1, data2);
 
     if (handleTransport(status, data1, data2)) return;
 
@@ -346,7 +310,8 @@ function flush() {
     initFlush = false;
   }
   if (effectTrackBank.scrollPosition().get() !== lastEffectScrollPosition) {
-    host.showPopupNotification(effectTrackBank.getItemAt(0).name().get() + " - " + effectTrackBank.getItemAt(3).name().get())
+    host.showPopupNotification(effectTrackBank.getItemAt(0).name().get() + " - " +
+      effectTrackBank.getItemAt(3).name().get())
     lastEffectScrollPosition = effectTrackBank.scrollPosition().get()
   }
 
@@ -377,21 +342,9 @@ function flush() {
 
   for (let i = 0; i < SCENES_MAX_INDEX + 1; i++) {
     let cs = rgb2hsv(
-      trackBank
-      .sceneBank()
-      .getScene(i)
-      .color()
-      .red() * 255,
-      trackBank
-      .sceneBank()
-      .getScene(i)
-      .color()
-      .green() * 255,
-      trackBank
-      .sceneBank()
-      .getScene(i)
-      .color()
-      .blue() * 255
+      trackBank.sceneBank().getScene(i).color().red() * 255,
+      trackBank.sceneBank().getScene(i).color().green() * 255,
+      trackBank.sceneBank().getScene(i).color().blue() * 255
     );
 
     //let c = rgb2hsv(255, 0, 0);
@@ -405,88 +358,34 @@ function flush() {
       sceneBrightness = MEDIUM;
     }
 
-    setPadColor(
-      SCENE_START_CC + i,
-      cs.h,
-      cs.s,
-      (cs.v = sceneBrightness)
-    );
-    setPadColor(
-      SCENE_START_CC_SHIFT + i,
-      cs.h,
-      cs.s,
-      (cs.v = sceneBrightness)
-    );
+    setPadColor(SCENE_START_CC + i, cs.h, cs.s, sceneBrightness);
+    setPadColor(SCENE_START_CC_SHIFT + i, cs.h, cs.s, sceneBrightness);
   }
 
   for (let i = 0; i < 4 * (TRACKS_MAX_INDEX + 1); i++) {
-    let isPlaying =
-      getClipFromTrackBank(i)
-      .isPlaying()
-      .get();
+    let isPlaying = getClipFromTrackBank(i).isPlaying().get();
     let brightness = isPlaying ? BRIGHT : DIM;
 
-    if (getClipFromTrackBank(i)
-      .hasContent().get()) {
+    if (getClipFromTrackBank(i).hasContent().get()) {
 
-      if (getClipFromTrackBank(i)
-        .isRecording()
-        .get() || getClipFromTrackBank(i)
-        .isRecordingQueued()
-        .get()) {
-        setPadColor(
-          CLIP_START_CC + i,
-          0,
-          127,
-          brightness
-        );
-        setPadColor(
-          CLIP_START_CC_SHIFT + i,
-          0,
-          127,
-          brightness
-        );
+      if (getClipFromTrackBank(i).isRecording().get() ||
+        getClipFromTrackBank(i).isRecordingQueued().get()) {
+        setPadColor(CLIP_START_CC + i, 0, 127, brightness);
+        setPadColor(CLIP_START_CC_SHIFT + i, 0, 127, brightness);
       } else {
 
-        let cclip = rgb2hsv(
-          getClipFromTrackBank(i)
-          .color()
-          .red() * 255,
-          getClipFromTrackBank(i)
-          .color()
-          .green() * 255,
-          getClipFromTrackBank(i)
-          .color()
-          .blue() * 255
+        let cclip = rgb2hsv(getClipFromTrackBank(i).color().red() * 255,
+          getClipFromTrackBank(i).color().green() * 255,
+          getClipFromTrackBank(i).color().blue() * 255
         );
 
         //setPadColor(CLIP_START_CC + i, cclip.h * 127, cclip.s * 127, cclip.v * 127);
-        setPadColor(
-          CLIP_START_CC + i,
-          cclip.h,
-          cclip.s,
-          cclip.v !== 0 ? brightness : 0
-        );
-        setPadColor(
-          CLIP_START_CC_SHIFT + i,
-          cclip.h,
-          cclip.s,
-          cclip.v !== 0 ? brightness : 0
-        );
+        setPadColor(CLIP_START_CC + i, cclip.h, cclip.s, cclip.v !== 0 ? brightness : 0);
+        setPadColor(CLIP_START_CC_SHIFT + i, cclip.h, cclip.s, cclip.v !== 0 ? brightness : 0);
       }
     } else {
-      setPadColor(
-        CLIP_START_CC + i,
-        0,
-        0,
-        0
-      );
-      setPadColor(
-        CLIP_START_CC_SHIFT + i,
-        0,
-        0,
-        0
-      );
+      setPadColor(CLIP_START_CC + i, 0, 0, 0);
+      setPadColor(CLIP_START_CC_SHIFT + i, 0, 0, 0);
     }
   }
 
@@ -498,10 +397,7 @@ function flush() {
 
   for (let i = MUTE_AND_SOLO_START_SHIFT; i <= MUTE_AND_SOLO_END_SHIFT; i++) {
     if (
-      trackBank
-      .getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END_SHIFT - i))
-      .solo()
-      .get()
+      trackBank.getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END_SHIFT - i)).solo().get()
     ) {
       sendMidi(CC_CHANNEL_13, i, BRIGHT);
     } else {
@@ -511,10 +407,7 @@ function flush() {
 
   for (let i = MUTE_AND_SOLO_START; i <= MUTE_AND_SOLO_END; i++) {
     if (
-      trackBank
-      .getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END - i))
-      .mute()
-      .get()
+      trackBank.getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END - i)).mute().get()
     ) {
       sendMidi(CC_CHANNEL_13, i, ON);
     } else {
@@ -608,98 +501,50 @@ function handleClips(status, data1, data2) {
   if (data1 >= CLIP_START_CC && data1 <= CLIP_END_CC && data2 > 0) {
     let pnum = data1 - CLIP_START_CC;
     if (specialIsPressed) {
-      trackBank
-        .getItemAt(parseInt(pnum / 4))
-        .clipLauncherSlotBank()
-        .duplicateClip(pnum % 4);
+      trackBank.getItemAt(parseInt(pnum / 4)).clipLauncherSlotBank().duplicateClip(pnum % 4);
     } else if (clipRecordIsPressed) {
-      if (getClipFromTrackBank(pnum)
-        .isRecording()
-        .get() || getClipFromTrackBank(pnum)
-        .isRecordingQueued()
-        .get()) {
-        trackBank
-          .getItemAt(parseInt(pnum / 4))
-          .stop();
+      if (getClipFromTrackBank(pnum).isRecording().get() ||
+        getClipFromTrackBank(pnum).isRecordingQueued().get()) {
+        trackBank.getItemAt(parseInt(pnum / 4)).stop();
       } else {
         if (transport.isPlaying().get()) {
-          trackBank
-            .getItemAt(parseInt(pnum / 4))
-            .clipLauncherSlotBank()
-            .record(pnum % 4);
+          trackBank.getItemAt(parseInt(pnum / 4)).clipLauncherSlotBank().record(pnum % 4);
         }
       }
-    } else if (!getClipFromTrackBank(pnum)
-      .isPlaying()
-      .get())
-      getClipFromTrackBank(pnum)
-      .launch();
+    } else if (!getClipFromTrackBank(pnum).isPlaying().get())
+      getClipFromTrackBank(pnum).launch();
     else
-      trackBank
-      .getItemAt(parseInt(pnum / 4))
-      .stop();
+      trackBank.getItemAt(parseInt(pnum / 4)).stop();
     if (
-      trackBank
-      .getItemAt(parseInt(pnum / 4))
-      .isGroup()
-      .get()
-    ) {
+      trackBank.getItemAt(parseInt(pnum / 4)).isGroup().get()) {
       lastScenePressed = pnum % 4;
     }
     return true;
   } else if (data1 >= CLIP_START_CC_SHIFT && data1 <= CLIP_END_CC_SHIFT && data2 > 0) {
     let pnum = data1 - CLIP_START_CC_SHIFT;
     if (shiftSpecialIsPressed && !clipRecordIsPressed) {
-      if (getClipFromTrackBank(pnum)
-        .hasContent().get()) {
-        trackBank
-          .getItemAt(parseInt(pnum / 4))
-          .clipLauncherSlotBank()
-          .deleteClip(pnum % 4);
+      if (getClipFromTrackBank(pnum).hasContent().get()) {
+        trackBank.getItemAt(parseInt(pnum / 4)).clipLauncherSlotBank().deleteClip(pnum % 4);
       } else {
-        trackBank
-          .getItemAt(parseInt(pnum / 4))
-          .clipLauncherSlotBank()
-          .createEmptyClip(pnum % 4, clipLength);
+        trackBank.getItemAt(parseInt(pnum / 4)).clipLauncherSlotBank().createEmptyClip(pnum % 4, clipLength);
       }
     } else if (clipRecordIsPressed && shiftSpecialIsPressed) {
-      trackBank
-        .getItemAt(parseInt(pnum / 4))
-        .clipLauncherSlotBank()
-        .select(pnum % 4);
+      trackBank.getItemAt(parseInt(pnum / 4)).clipLauncherSlotBank().select(pnum % 4);
       cursorClip.duplicateContent();
     } else if (clipRecordIsPressed) {
-      if (getClipFromTrackBank(pnum)
-        .isRecording()
-        .get() || getClipFromTrackBank(pnum)
-        .isRecordingQueued()
-        .get()) {
-        trackBank
-          .getItemAt(parseInt(pnum / 4))
-          .stop();
+      if (getClipFromTrackBank(pnum).isRecording().get() ||
+        getClipFromTrackBank(pnum).isRecordingQueued().get()) {
+        trackBank.getItemAt(parseInt(pnum / 4)).stop();
       } else {
         if (transport.isPlaying().get()) {
-          trackBank
-            .getItemAt(parseInt(pnum / 4))
-            .clipLauncherSlotBank()
-            .record(pnum % 4);
+          trackBank.getItemAt(parseInt(pnum / 4)).clipLauncherSlotBank().record(pnum % 4);
         }
       }
-    } else if (!getClipFromTrackBank(pnum)
-      .isPlaying()
-      .get())
-      getClipFromTrackBank(pnum)
-      .launch();
+    } else if (!getClipFromTrackBank(pnum).isPlaying().get())
+      getClipFromTrackBank(pnum).launch();
     else
-      trackBank
-      .getItemAt(parseInt(pnum / 4))
-      .stop();
-    if (
-      trackBank
-      .getItemAt(parseInt(pnum / 4))
-      .isGroup()
-      .get()
-    ) {
+      trackBank.getItemAt(parseInt(pnum / 4)).stop();
+    if (trackBank.getItemAt(parseInt(pnum / 4)).isGroup().get()) {
       lastScenePressed = pnum % 4;
     }
     return true;
@@ -760,28 +605,16 @@ function handleChannels(status, data1, data2) {
     masterTrack.pan().set(data2, 128);
     return true;
   } else if (data1 >= VOLUME_SLIDERS_START && data1 <= VOLUME_SLIDERS_END && !specialIsPressed) {
-    trackBank
-      .getItemAt(TRACKS_MAX_INDEX - (VOLUME_SLIDERS_END - data1))
-      .volume()
-      .set(data2, 128);
+    trackBank.getItemAt(TRACKS_MAX_INDEX - (VOLUME_SLIDERS_END - data1)).volume().set(data2, 128);
     return true;
   } else if (data1 >= VOLUME_SLIDERS_START_SHIFT && data1 <= VOLUME_SLIDERS_END_SHIFT) {
-    effectTrackBank
-      .getItemAt(EFFECTS_MAX_INDEX - (VOLUME_SLIDERS_END_SHIFT - data1))
-      .volume()
-      .set(data2, 128);
+    effectTrackBank.getItemAt(EFFECTS_MAX_INDEX - (VOLUME_SLIDERS_END_SHIFT - data1)).volume().set(data2, 128);
     return true;
   } else if (data1 >= PAN_ROTARY_START && data1 <= PAN_ROTARY_END && !specialIsPressed) {
-    trackBank
-      .getItemAt(TRACKS_MAX_INDEX - (PAN_ROTARY_END - data1))
-      .pan()
-      .set(data2, 128);
+    trackBank.getItemAt(TRACKS_MAX_INDEX - (PAN_ROTARY_END - data1)).pan().set(data2, 128);
     return true;
   } else if (data1 >= PAN_ROTARY_START_SHIFT && data1 <= PAN_ROTARY_END_SHIFT && !shiftSpecialIsPressed) {
-    effectTrackBank
-      .getItemAt(EFFECTS_MAX_INDEX - (PAN_ROTARY_END_SHIFT - data1))
-      .pan()
-      .set(data2, 128);
+    effectTrackBank.getItemAt(EFFECTS_MAX_INDEX - (PAN_ROTARY_END_SHIFT - data1)).pan().set(data2, 128);
     return true;
   } else if (data1 >= PAN_ROTARY_START && data1 <= PAN_ROTARY_END + 1 && specialIsPressed) {
     cursorTrack.sendBank().getItemAt(3 - (PAN_ROTARY_END + 1 - data1)).set(data2, 128);
@@ -800,21 +633,10 @@ function handleChannels(status, data1, data2) {
       trackBank.getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END_SHIFT - data1)).arm().set(true)
     return true;
   } else if (data1 >= MUTE_AND_SOLO_START && data1 <= MUTE_AND_SOLO_END && !specialIsPressed) {
-    if (
-      trackBank
-      .getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END - data1))
-      .mute()
-      .get()
-    ) {
-      trackBank
-        .getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END - data1))
-        .mute()
-        .set(false);
+    if (trackBank.getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END - data1)).mute().get()) {
+      trackBank.getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END - data1)).mute().set(false);
     } else {
-      trackBank
-        .getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END - data1))
-        .mute()
-        .set(true);
+      trackBank.getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END - data1)).mute().set(true);
     }
     return true;
   } else if (data1 === MUTE_AND_SOLO_MASTER && specialIsPressed) {
@@ -842,21 +664,10 @@ function handleChannels(status, data1, data2) {
     return true;
   } else if (
     data1 >= MUTE_AND_SOLO_START_SHIFT && data1 <= MUTE_AND_SOLO_END_SHIFT && !specialIsPressed) {
-    if (
-      trackBank
-      .getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END_SHIFT - data1))
-      .solo()
-      .get()
-    ) {
-      trackBank
-        .getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END_SHIFT - data1))
-        .solo()
-        .set(false);
+    if (trackBank.getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END_SHIFT - data1)).solo().get()) {
+      trackBank.getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END_SHIFT - data1)).solo().set(false);
     } else {
-      trackBank
-        .getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END_SHIFT - data1))
-        .solo()
-        .set(true);
+      trackBank.getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END_SHIFT - data1)).solo().set(true);
     }
     return true;
   }
@@ -866,16 +677,10 @@ function handleChannels(status, data1, data2) {
 function handleBrowser(status, data1, data2) {
   if (data1 === BROWSE_BUTTON && specialIsPressed && !popupBrowser.exists().get()) {
     cursorDevice.afterDeviceInsertionPoint().browse()
-    sendMidi(
-      CC_CHANNEL_13,
-      PUSH_ROTARY_SHIFT,
-      lastSelectedBrowserColumn === undefined ? 0 : lastSelectedBrowserColumn + 1
-    );
-    sendMidi(
-      CC_CHANNEL_13,
-      PUSH_ROTARY,
-      lastSelectedBrowserColumn === undefined ? 0 : lastSelectedBrowserColumn + 1
-    );
+    sendMidi(CC_CHANNEL_13, PUSH_ROTARY_SHIFT,
+      lastSelectedBrowserColumn === undefined ? 0 : lastSelectedBrowserColumn + 1);
+    sendMidi(CC_CHANNEL_13, PUSH_ROTARY,
+      lastSelectedBrowserColumn === undefined ? 0 : lastSelectedBrowserColumn + 1);
     //deviceBrowser.startBrowsing();
     //deviceBrowser.activateSession(deviceBrowser.getDeviceSession());
     return true;
@@ -884,16 +689,10 @@ function handleBrowser(status, data1, data2) {
     //deviceBrowser.activateSession(deviceBrowser.getDeviceSession());
     cursorDevice.createDeviceBrowser(1, 1).startBrowsing()
     cursorDevice.afterDeviceInsertionPoint().browse()
-    sendMidi(
-      CC_CHANNEL_13,
-      PUSH_ROTARY_SHIFT,
-      lastSelectedBrowserColumn === undefined ? 1 : lastSelectedBrowserColumn + 1
-    );
-    sendMidi(
-      CC_CHANNEL_13,
-      PUSH_ROTARY,
-      lastSelectedBrowserColumn === undefined ? 1 : lastSelectedBrowserColumn + 1
-    );
+    sendMidi(CC_CHANNEL_13, PUSH_ROTARY_SHIFT,
+      lastSelectedBrowserColumn === undefined ? 1 : lastSelectedBrowserColumn + 1);
+    sendMidi(CC_CHANNEL_13, PUSH_ROTARY,
+      lastSelectedBrowserColumn === undefined ? 1 : lastSelectedBrowserColumn + 1);
     return true;
   } else if (data1 === BROWSE_BUTTON && popupBrowser.exists().get()) {
     popupBrowser.cancel();
@@ -923,12 +722,10 @@ function handleBrowser(status, data1, data2) {
       else if (lastSelectedBrowserColumn === 8)
         fileTypeCursor.selectNext();
       else if (lastSelectedBrowserColumn === 9) {
-        popupBrowser
-          .selectedContentTypeIndex()
-          .set(
-            popupBrowser.selectedContentTypeIndex().get() < 4 ?
-            popupBrowser.selectedContentTypeIndex().get() + 1 : 0
-          );
+        popupBrowser.selectedContentTypeIndex().set(
+          popupBrowser.selectedContentTypeIndex().get() < 4 ?
+          popupBrowser.selectedContentTypeIndex().get() + 1 : 0
+        );
       }
     } else {
       if (!lastSelectedBrowserColumn || lastSelectedBrowserColumn === 0 || lastSelectedBrowserColumn > 9) {
@@ -952,12 +749,10 @@ function handleBrowser(status, data1, data2) {
       else if (lastSelectedBrowserColumn === 8)
         fileTypeCursor.selectPrevious();
       else if (lastSelectedBrowserColumn === 9) {
-        popupBrowser
-          .selectedContentTypeIndex()
-          .set(
-            popupBrowser.selectedContentTypeIndex().get() > 0 ?
-            popupBrowser.selectedContentTypeIndex().get() - 1 : 4
-          );
+        popupBrowser.selectedContentTypeIndex().set(
+          popupBrowser.selectedContentTypeIndex().get() > 0 ?
+          popupBrowser.selectedContentTypeIndex().get() - 1 : 4
+        );
       }
     }
     return true;
@@ -970,17 +765,11 @@ function handleBrowser(status, data1, data2) {
     } else {
       lastSelectedBrowserColumn = chooseBrowserCursor(lastSelectedBrowserColumn, false)
     }
-    sendMidi(
-      CC_CHANNEL_13,
-      PUSH_ROTARY_SHIFT,
-      lastSelectedBrowserColumn === undefined ? 1 : lastSelectedBrowserColumn + 1
-    );
+    sendMidi(CC_CHANNEL_13, PUSH_ROTARY_SHIFT,
+      lastSelectedBrowserColumn === undefined ? 1 : lastSelectedBrowserColumn + 1);
 
-    sendMidi(
-      CC_CHANNEL_13,
-      PUSH_ROTARY,
-      lastSelectedBrowserColumn === undefined ? 1 : lastSelectedBrowserColumn + 1
-    );
+    sendMidi(CC_CHANNEL_13, PUSH_ROTARY,
+      lastSelectedBrowserColumn === undefined ? 1 : lastSelectedBrowserColumn + 1);
     return true;
   } else if (data1 === PUSH_ROTARY_PUSH && data2 > 0 && popupBrowser.exists().get()) {
     popupBrowser.commit();
@@ -1053,10 +842,7 @@ function rgba2rgb(RGB_background, RGBA_color) {
 }
 
 function getClipFromTrackBank(t) {
-  return trackBank
-    .getItemAt(parseInt(t / 4))
-    .clipLauncherSlotBank()
-    .getItemAt(t % 4)
+  return trackBank.getItemAt(parseInt(t / 4)).clipLauncherSlotBank().getItemAt(t % 4)
 }
 
 function chooseBrowserCursor(index, forwards) {
