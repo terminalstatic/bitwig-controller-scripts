@@ -529,17 +529,21 @@ function handleTransport(status, data1, data2) {
   if (data1 === PLAY_BUTTON) {
     transport.play();
     return true;
-  } else if (data1 === PLAY_RESET_BUTTON_SHIFT && data2 > 0) {
+  } else if (data1 === PLAY_RESET_BUTTON_SHIFT) {
     transport.stop();
     transport.setPosition(0);
     return true;
-  } else if (data1 === ARRANGER_RECORD_BUTTON && data2 > 0) {
+  } else if (data1 === ARRANGER_RECORD_BUTTON) {
     transport.record()
     return true;
-  } else if (data1 === ARRANGER_AUTOMATION && data2 > 0) {
+  } else if (data1 === ARRANGER_AUTOMATION && specialIsPressed) {
+    let action = application.getAction("Save");
+    if (action)
+      action.invoke();
+  } else if (data1 === ARRANGER_AUTOMATION) {
     transport.toggleWriteArrangerAutomation()
     return true;
-  } else if (data1 === CLIP_AUTOMATION_AND_OVERWRITE && data2 > 0) {
+  } else if (data1 === CLIP_AUTOMATION_AND_OVERWRITE) {
     transport.toggleWriteClipLauncherAutomation()
     transport.isClipLauncherOverdubEnabled().toggle();
     return true;

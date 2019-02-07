@@ -21,6 +21,8 @@ For the ports choose port 1 for in and out (script currently only works with one
 
 **shift + capture** toggle clip overdub and automation overdub
 
+**push rotary push encoder + capture** save current project
+
 **reverse** and **shift + reverse** move scene cursor forward/backwards
 
 **type** and **shift + type** move track cursor forward/backwards
@@ -39,7 +41,7 @@ For the ports choose port 1 for in and out (script currently only works with one
 
 **shift + rotary push encoder** move next/prev column
 
-**push rotary push encoder** select column item and exit browser
+**push rotary push encoder** select item and exit browser
 
 **browse** exit browser without selecting an item
 
@@ -57,7 +59,7 @@ For the ports choose port 1 for in and out (script currently only works with one
 
 **shift + rotary push encoder** set empty clip length, default 1
 
-**shift + push rotary push encoder + pad** delete clip if clip exists, create empty clip if clip doesn't exist
+**shift + push rotary push encoder + pad** delete clip if clip exists, create empty clip with selected length if clip doesn't exist
 
 **small pads 1-3** mute tracks
 
