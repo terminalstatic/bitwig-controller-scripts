@@ -69,6 +69,12 @@ For the ports choose port 1 for in and out (script currently only works with one
 
 **push rotary push encoder + small pads 1-3** select track
 
+**push rotary push encoder + small pad 4** select master
+
+**shift + push rotary push encoder + small pads 1-3** toggle arm track
+
+**shift push rotary push encoder + small pad 4** toggle arm master (???)
+
 **shift + push rotary push encoder + small pads 1-3** toggle record for track
 
 #### Rotary encoders and faders

@@ -147,6 +147,7 @@ function init() {
   masterTrack.pan().markInterested();
   masterTrack.mute().markInterested();
   masterTrack.solo().markInterested();
+  masterTrack.arm().markInterested();
 
   popupBrowser.exists().markInterested();
   popupBrowser.selectedContentTypeIndex().markInterested();
@@ -757,6 +758,7 @@ function handleChannels(status, data1, data2) {
   } else if (data1 >= MUTE_AND_SOLO_START && data1 <= MUTE_AND_SOLO_END && specialIsPressed) {
     trackBank.getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END - data1)).select()
     return true;
+
   } else if (data1 >= MUTE_AND_SOLO_START_SHIFT && data1 <= MUTE_AND_SOLO_END_SHIFT && shiftSpecialIsPressed) {
     if (trackBank.getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END_SHIFT - data1)).arm().get())
       trackBank.getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END_SHIFT - data1)).arm().set(false)
@@ -780,6 +782,15 @@ function handleChannels(status, data1, data2) {
         .mute()
         .set(true);
     }
+    return true;
+  } else if (data1 === MUTE_AND_SOLO_MASTER && specialIsPressed) {
+    masterTrack.select()
+    return true;
+  } else if (data1 === MUTE_AND_SOLO_MASTER_SHIFT && shiftSpecialIsPressed) {
+    if (masterTrack.arm().get())
+      masterTrack.arm().set(false)
+    else
+      masterTrack.arm().set(true)
     return true;
   } else if (data1 === MUTE_AND_SOLO_MASTER && !specialIsPressed) {
     if (masterTrack.mute().get()) {
