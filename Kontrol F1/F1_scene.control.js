@@ -787,7 +787,6 @@ function handleChannels(status, data1, data2) {
     cursorTrack.sendBank().getItemAt(3 - (PAN_ROTARY_END + 1 - data1)).set(data2, 128);
     return true;
   } else if (data1 >= VOLUME_SLIDERS_START && data1 <= VOLUME_SLIDERS_END + 1 && specialIsPressed) {
-    println((7 - (VOLUME_SLIDERS_END + 1 - data1)));
     cursorTrack.sendBank().getItemAt(7 - (VOLUME_SLIDERS_END + 1 - data1)).set(data2, 128);
     return true;
   } else if (data1 >= MUTE_AND_SOLO_START && data1 <= MUTE_AND_SOLO_END && specialIsPressed) {
