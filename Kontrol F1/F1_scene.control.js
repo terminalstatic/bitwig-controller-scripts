@@ -161,6 +161,7 @@ function init() {
 
   for (let i = 0; i <= EFFECTS_MAX_INDEX; i++) {
     effectTrackBank.getItemAt(i).name().markInterested()
+    effectTrackBank.getItemAt(i).arm().markInterested()
     effectTrackBank.getItemAt(i).volume().value().addValueObserver(128, function (v) {
       sendMidi(CC_CHANNEL_13, PUSH_ROTARY_SHIFT, v);
       lastShiftDisplayValue = v;
@@ -307,6 +308,8 @@ function flush() {
   if (initFlush) {
     sendMidi(CC_CHANNEL_13, PUSH_ROTARY, 0);
     sendMidi(CC_CHANNEL_13, PUSH_ROTARY_SHIFT, 0);
+    lastDisplayValue = 0;
+    lastShiftDisplayValue = 0;
     initFlush = false;
   }
   if (effectTrackBank.scrollPosition().get() !== lastEffectScrollPosition) {
@@ -622,11 +625,20 @@ function handleChannels(status, data1, data2) {
   } else if (data1 >= VOLUME_SLIDERS_START && data1 <= VOLUME_SLIDERS_END + 1 && specialIsPressed) {
     cursorTrack.sendBank().getItemAt(7 - (VOLUME_SLIDERS_END + 1 - data1)).set(data2, 128);
     return true;
-  } else if (data1 >= MUTE_AND_SOLO_START && data1 <= MUTE_AND_SOLO_END && specialIsPressed) {
+  } else if (data1 >= MUTE_AND_SOLO_START && data1 <= MUTE_AND_SOLO_END && specialIsPressed && !clipRecordIsPressed) {
     trackBank.getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END - data1)).select()
     return true;
 
-  } else if (data1 >= MUTE_AND_SOLO_START_SHIFT && data1 <= MUTE_AND_SOLO_END_SHIFT && shiftSpecialIsPressed) {
+  } else if (data1 >= MUTE_AND_SOLO_START_SHIFT && data1 <= MUTE_AND_SOLO_END_SHIFT + 1 && shiftSpecialIsPressed && !clipRecordIsPressed) {
+    effectTrackBank.getItemAt(EFFECTS_MAX_INDEX - ((MUTE_AND_SOLO_END_SHIFT + 1) - data1)).select();
+    return true;
+  } else if (data1 >= MUTE_AND_SOLO_START_SHIFT && data1 <= MUTE_AND_SOLO_END_SHIFT + 1 && shiftSpecialIsPressed && clipRecordIsPressed) {
+    if (effectTrackBank.getItemAt(EFFECTS_MAX_INDEX - ((MUTE_AND_SOLO_END_SHIFT + 1) - data1)).arm().get())
+      effectTrackBank.getItemAt(EFFECTS_MAX_INDEX - ((MUTE_AND_SOLO_END_SHIFT + 1) - data1)).arm().set(false)
+    else
+      effectTrackBank.getItemAt(EFFECTS_MAX_INDEX - ((MUTE_AND_SOLO_END_SHIFT + 1) - data1)).arm().set(true)
+    return true;
+  } else if (data1 >= MUTE_AND_SOLO_START_SHIFT && data1 <= MUTE_AND_SOLO_END_SHIFT && clipRecordIsPressed) {
     if (trackBank.getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END_SHIFT - data1)).arm().get())
       trackBank.getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END_SHIFT - data1)).arm().set(false)
     else
@@ -642,33 +654,34 @@ function handleChannels(status, data1, data2) {
   } else if (data1 === MUTE_AND_SOLO_MASTER && specialIsPressed) {
     masterTrack.select()
     return true;
-  } else if (data1 === MUTE_AND_SOLO_MASTER_SHIFT && shiftSpecialIsPressed) {
-    if (masterTrack.arm().get())
-      masterTrack.arm().set(false)
-    else
-      masterTrack.arm().set(true)
-    return true;
-  } else if (data1 === MUTE_AND_SOLO_MASTER && !specialIsPressed) {
+  } else if (data1 === MUTE_AND_SOLO_MASTER && !specialIsPressed && !shiftSpecialIsPressed) {
     if (masterTrack.mute().get()) {
       masterTrack.mute().set(false);
     } else {
       masterTrack.mute().set(true);
     }
     return true;
-  } else if (data1 === MUTE_AND_SOLO_MASTER_SHIFT && !specialIsPressed) {
+  } else if (data1 === MUTE_AND_SOLO_MASTER_SHIFT && !specialIsPressed &&
+    !shiftSpecialIsPressed && !clipRecordIsPressed) {
     if (masterTrack.solo().get()) {
       masterTrack.solo().set(false);
     } else {
       masterTrack.solo().set(true);
     }
     return true;
-  } else if (
-    data1 >= MUTE_AND_SOLO_START_SHIFT && data1 <= MUTE_AND_SOLO_END_SHIFT && !specialIsPressed) {
+  } else if (data1 >= MUTE_AND_SOLO_START_SHIFT && data1 <= MUTE_AND_SOLO_END_SHIFT &&
+    !specialIsPressed && !clipRecordIsPressed) {
     if (trackBank.getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END_SHIFT - data1)).solo().get()) {
       trackBank.getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END_SHIFT - data1)).solo().set(false);
     } else {
       trackBank.getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END_SHIFT - data1)).solo().set(true);
     }
+    return true;
+  } else if (data1 === MUTE_AND_SOLO_MASTER_SHIFT && clipRecordIsPressed) {
+    if (masterTrack.arm().get())
+      masterTrack.arm().set(false)
+    else
+      masterTrack.arm().set(true)
     return true;
   }
   return false;
