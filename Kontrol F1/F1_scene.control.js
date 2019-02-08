@@ -248,7 +248,7 @@ function init() {
     trackBank.getItemAt(parseInt(i / 4)).isGroup().markInterested();
   }
 
-  for (i = 0; i <= TRACKS_MAX_INDEX; i++) {
+  for (let i = 0; i <= TRACKS_MAX_INDEX; i++) {
     trackBank.getItemAt(i).clipLauncherSlotBank().setIndication(true);
   }
 
@@ -259,6 +259,12 @@ function init() {
   initLightShow();
 
   sendMidi(CC_CHANNEL_13, PUSH_ROTARY_SHIFT, clipLength)
+
+  /*let actions = application.getActions()
+  for (let i = 0; i < actions.length; i++) {
+    if (actions[i].getName().indexOf("cursor") !== -1)
+      println(actions[i].getName() + "\\" + actions[i].getId())
+  }*/
   println("F1 scene control initialized!");
 }
 
@@ -628,7 +634,6 @@ function handleChannels(status, data1, data2) {
   } else if (data1 >= MUTE_AND_SOLO_START && data1 <= MUTE_AND_SOLO_END && specialIsPressed && !clipRecordIsPressed) {
     trackBank.getItemAt(TRACKS_MAX_INDEX - (MUTE_AND_SOLO_END - data1)).select()
     return true;
-
   } else if (data1 >= MUTE_AND_SOLO_START_SHIFT && data1 <= MUTE_AND_SOLO_END_SHIFT + 1 && shiftSpecialIsPressed && !clipRecordIsPressed) {
     effectTrackBank.getItemAt(EFFECTS_MAX_INDEX - ((MUTE_AND_SOLO_END_SHIFT + 1) - data1)).select();
     return true;
