@@ -55,7 +55,7 @@ host.defineController("Native Instruments", "Traktor Kontrol F1 Note", "0.1", "3
 host.defineMidiPorts(1, 1);
 
 let velocity = 127
-let noteOffset = 0
+let noteOffset = 24
 let noteTable = []
 let steps = []
 let notesText = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
@@ -73,8 +73,247 @@ let resolutionText = [
     "1/32",
     "1/32t"
 ];
+
+const CHROMATIC = [0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+];
+
+const MAJOR = [0,
+    2,
+    4,
+    5,
+    7,
+    9,
+    11
+];
+
+const MINOR = [0,
+    2,
+    3,
+    5,
+    7,
+    8,
+    10
+];
+
+const DORIAN = [0,
+    2,
+    3,
+    5,
+    7,
+    9,
+    10
+];
+
+const MIXOLYDIAN = [0,
+    2,
+    4,
+    5,
+    7,
+    9,
+    10
+];
+
+const LYDIAN = [0,
+    0,
+    2,
+    4,
+    6,
+    7,
+    9,
+    11
+];
+
+const PHRYGIAN = [0,
+    1,
+    3,
+    5,
+    7,
+    8,
+    10
+];
+
+const LOCRIAN = [0,
+    1,
+    3,
+    5,
+    6,
+    8,
+    10
+];
+
+const DIMINISHED = [0,
+    1,
+    3,
+    4,
+    6,
+    7,
+    9,
+    10
+];
+
+const WHOLEHALF = [0,
+    2,
+    3,
+    5,
+    6,
+    8,
+    9,
+    11
+];
+
+const HALFWHOLE = [0,
+    1,
+    3,
+    4,
+    6,
+    7,
+    9,
+    10
+];
+
+const WHOLETONE = [0,
+    2,
+    4,
+    6,
+    8,
+    10
+];
+
+const MINORBLUES = [0,
+    3,
+    5,
+    6,
+    7,
+    10
+];
+
+const MINORPENTATONIC = [0,
+    3,
+    5,
+    7,
+    10
+];
+
+const MAJORPENTATONIC = [0,
+    2,
+    4,
+    7,
+    9
+];
+
+const HARMONICMINOR = [0,
+    2,
+    3,
+    5,
+    7,
+    8,
+    11
+];
+
+const MELODICMINOR = [0,
+    2,
+    3,
+    5,
+    7,
+    9,
+    11
+];
+
+const SUPERLOCRIAN = [0,
+    1,
+    3,
+    4,
+    6,
+    8,
+    10
+];
+
+const BHAIRAV = [0,
+    1,
+    4,
+    5,
+    7,
+    8,
+    11
+];
+
+const HUNGARIANMINOR = [0,
+    2,
+    3,
+    6,
+    7,
+    8,
+    11
+];
+
+const MINORGYPSI = [0,
+    1,
+    4,
+    5,
+    7,
+    8,
+    10
+];
+
+const HIROJOSHI = [0,
+    2,
+    3,
+    7,
+    8
+];
+
+const INSEN = [0,
+    1,
+    5,
+    7,
+    10
+];
+
+const IWATO = [0,
+    1,
+    5,
+    6,
+    10
+];
+
+const KUMOI = [0,
+    2,
+    3,
+    7,
+    9
+];
+
+const PELOG = [0,
+    1,
+    3,
+    4,
+    7,
+    8
+];
+
+const SPANISH = [0,
+    1,
+    4,
+    5,
+    7,
+    9,
+    10
+];
+
 let resolutionIndex = 4;
 let seqPageIndex = 0;
+
 
 function init() {
     transport = host.createTransport();
@@ -82,9 +321,11 @@ function init() {
     noteIn = host.getMidiInPort(0).createNoteInput("", "?D????");
     noteIn.setShouldConsumeEvents(false);
     noteIn.setVelocityTranslationTable(initArray(velocity, 128))
-    notesInit(noteTable)
+    notesInit(noteTable, CHROMATIC);
+    setNoteTable(noteIn, noteTable, noteOffset, CHROMATIC)
 
-    noteIn.setKeyTranslationTable(noteTable)
+    //noteIn.setKeyTranslationTable(noteTable);
+
     host.getMidiInPort(0).setMidiCallback(onMidi0);
     userControls = host.createUserControls(HIGHEST_CC - LOWEST_CC + 1);
 
@@ -178,16 +419,18 @@ function onMidi0(status, data1, data2) {
             }
         } else if (data1 === VELOCITY_OFFSET_ROTARY && isPushed === true) {
             if (data2 === 127) {
-                if (noteOffset > -36) {
-                    noteOffset--
+                println(noteOffset - 12)
+                if (noteOffset - 12 >= -36) {
+                    noteOffset -= 12;
                     sendMidi(CHANNEL_14, VELOCITY_OFFSET_ROTARY, Math.abs(noteOffset))
-                    setNoteTable(noteIn, noteTable, noteOffset)
+                    setNoteTable(noteIn, noteTable, noteOffset, CHROMATIC)
                 }
             } else if (data2 === 1) {
-                if (noteOffset < 80) {
-                    noteOffset++
+                println(noteOffset + 12)
+                if (noteOffset + 12 <= 84) {
+                    noteOffset += 12;
                     sendMidi(CHANNEL_14, VELOCITY_OFFSET_ROTARY, Math.abs(noteOffset))
-                    setNoteTable(noteIn, noteTable, noteOffset)
+                    setNoteTable(noteIn, noteTable, noteOffset, CHROMATIC)
                 }
             }
         } else if (data1 === SEQ_VELOCITY_NOTE_ROTARY && isSeqPushed === true) {
@@ -317,19 +560,32 @@ function handleTransport(status, data1, data2) {
     return false;
 }
 
-function notesInit(noteTable) {
+function notesInit(noteTable, scale) {
+
     for (let i = 0; i < 128; i++) {
-        noteTable.push(i)
+        let n = (i % 12);
+        println(i + "=>" + n);
+        if (scale.indexOf(n) != -1)
+            noteTable.push(i)
+        else
+            noteTable.push(-1)
     }
 }
 
-function setNoteTable(noteIn, table, offset) {
+function setNoteTable(noteIn, table, offset, scale) {
+    println(table)
     for (let i = 0; i < 128; i++) {
-        table[i] = offset + i;
+        let n = ((i + offset) % 12);
+        if (scale.indexOf(n) != -1)
+            table[i] = offset + i;
+        else
+            table[i] = -1;
+
         if (table[i] < 0 || table[i] > 127) {
             table[i] = -1;
         }
     }
+    println(table)
     noteIn.setKeyTranslationTable(table);
 }
 
