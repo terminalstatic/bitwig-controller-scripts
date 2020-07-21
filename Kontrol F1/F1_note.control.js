@@ -24,8 +24,20 @@ const SEQ_VELOCITY_NOTE_ROTARY = 78
 const PUSH_ROTARY = 42
 const SEQ_PUSH_ROTARY = 79
 
+const AUX_SHIFT = 29
+const AUX_SHIFT_SHIFT = 70
+
+const NEXT_PREV_TRACK_BUTTON = 30;
+const NEXT_PREV_TRACK_BUTTON_SHIFT = 71;
+
+const NEXT_PREV_DEVICE_BUTTON = 32;
+const NEXT_PREV_DEVICE_BUTTON_SHIFT = 73;
+
 let isPushed = false
 let isSeqPushed = false
+
+let isAuxShiftPushed = false
+
 
 const PADS_SHIFT_START = 51
 const PADS_SHIFT_END = 66
@@ -46,6 +58,9 @@ const VOLUME_SLIDERS_END = 9;
 const VOLUME_SLIDERS_START_SHIFT = 47;
 const VOLUME_SLIDERS_END_SHIFT = 50;
 
+const UNDO_BUTTON = 31
+const UNDO_BUTTON_SHIFT = 72
+
 const TOGGLE_RESOLUTION = 72
 
 host.setShouldFailOnDeprecatedUse(true);
@@ -53,6 +68,24 @@ host.setShouldFailOnDeprecatedUse(true);
 host.defineController("Native Instruments", "Traktor Kontrol F1 Note", "0.1", "395b468a-1c98-11e9-ab14-d663bd873d93", "terminal_static");
 
 host.defineMidiPorts(1, 1);
+
+if (host.platformIsWindows()) {
+    host.addDeviceNameBasedDiscoveryPair(
+        ["Traktor Kontrol F1 - 1"],
+        ["Traktor Kontrol F1 - 1"]
+    );
+} else if (host.platformIsMac()) {
+    host.addDeviceNameBasedDiscoveryPair(
+        ["Traktor Kontrol F1 - 1"],
+        ["Traktor Kontrol F1 - 1"]
+    );
+
+} else if (host.platformIsLinux()) {
+    host.addDeviceNameBasedDiscoveryPair(
+        ["Traktor Kontrol F1 - 1"],
+        ["Traktor Kontrol F1 - 1"]
+    );
+}
 
 let velocity = 127
 let noteOffset = 24
@@ -316,6 +349,7 @@ let seqPageIndex = 0;
 
 
 function init() {
+    application = host.createApplication();
     transport = host.createTransport();
 
     noteIn = host.getMidiInPort(0).createNoteInput("", "?D????");
@@ -336,6 +370,7 @@ function init() {
     sendMidi(CHANNEL_14, VELOCITY_OFFSET_ROTARY, velocity)
 
     cursorTrack = host.createCursorTrack(0, 0);
+    cursorDevice = cursorTrack.createCursorDevice();
 
     cursorClip = host.createLauncherCursorClip(16, 128);
     cursorClip.setStepSize(resolution[resolutionIndex]);
@@ -348,16 +383,15 @@ function init() {
 
     cursorClip.color().markInterested()
 
-
     steps = new Array(16)
     for (let i = 0; i < steps.length; i++) {
         steps[i] = new Array(128)
     }
 
     cursorClip.addStepDataObserver(function (x, y, state) {
-        println("x: " + x)
-        println("y: " + y)
-        println("state: " + state);
+        //println("x: " + x)
+        //println("y: " + y)
+        //println("state: " + state);
 
         steps[x][y] = state;
     })
@@ -374,6 +408,7 @@ function init() {
 
     drumPadBank = cursorDevice.createDrumPadBank(16);
 
+    trackBank = host.createMainTrackBank(3, 0, 0);
     println("F1 note control initialized!");
 }
 
@@ -395,14 +430,25 @@ function onMidi0(status, data1, data2) {
         }
     }
 
+    if (data1 === AUX_SHIFT || data1 === AUX_SHIFT_SHIFT) {
+        if (data2 === 127) {
+            isAuxShiftPushed = true
+        } else {
+            isAuxShiftPushed = false
+        }
+    }
+
+
     if (isChannelController(status)) {
         /*if (data1 >= LOWEST_CC && data1 <= HIGHEST_CC) {
             let index = data1 - LOWEST_CC;
             userControls.getControl(index).set(data2, 128);
         }*/
-        if (handleTransport(status, data1, data2)) {
-            return;
-        } else if (data1 === VELOCITY_OFFSET_ROTARY && isPushed === false) {
+        if (handleTransport(status, data1, data2)) return;
+        if (handleNav(status, data1, data2)) return;
+        if (handleApplication(status, data1, data2)) return;
+
+        if (data1 === VELOCITY_OFFSET_ROTARY && isPushed === false) {
             if (data2 === 127) {
                 if (velocity > 0) {
                     velocity--;
@@ -419,14 +465,14 @@ function onMidi0(status, data1, data2) {
             }
         } else if (data1 === VELOCITY_OFFSET_ROTARY && isPushed === true) {
             if (data2 === 127) {
-                println(noteOffset - 12)
+                //println(noteOffset - 12)
                 if (noteOffset - 12 >= -36) {
                     noteOffset -= 12;
                     sendMidi(CHANNEL_14, VELOCITY_OFFSET_ROTARY, Math.abs(noteOffset))
                     setNoteTable(noteIn, noteTable, noteOffset, CHROMATIC)
                 }
             } else if (data2 === 1) {
-                println(noteOffset + 12)
+                //println(noteOffset + 12)
                 if (noteOffset + 12 <= 84) {
                     noteOffset += 12;
                     sendMidi(CHANNEL_14, VELOCITY_OFFSET_ROTARY, Math.abs(noteOffset))
@@ -458,7 +504,7 @@ function onMidi0(status, data1, data2) {
             host.showPopupNotification(currentSeqVelocity)
         } else if (data1 >= PADS_SHIFT_START && data1 <= PADS_SHIFT_END) {
             cursorClip.toggleStep(data1 - PADS_SHIFT_START, currentSeqNote, currentSeqVelocity)
-        } else if (data1 === TOGGLE_RESOLUTION) {
+        } else if (data1 === TOGGLE_RESOLUTION && isAuxShiftPushed) {
             if (resolutionIndex < resolution.length - 1) {
                 resolutionIndex++
             } else {
@@ -468,7 +514,7 @@ function onMidi0(status, data1, data2) {
             host.showPopupNotification(resolutionText[resolutionIndex])
         } else if (data1 >= SEQ_PAGE_0 && data1 <= SEQ_PAGE_3) {
             let localIndex = 3 - (SEQ_PAGE_3 - data1)
-            println(localIndex)
+            //println(localIndex)
             switch (localIndex) {
                 case 0:
                     cursorClip.scrollStepsPageBackwards();
@@ -495,10 +541,8 @@ function onMidi0(status, data1, data2) {
 }
 
 function flush() {
-    println("flush")
-
     if (cursorDevice.hasDrumPads) {
-        println("Drum device")
+        //println("Drum device")
     }
     //cursorClip.quantize(0.0000000001)
 
@@ -560,11 +604,44 @@ function handleTransport(status, data1, data2) {
     return false;
 }
 
+function handleNav(status, data1, data2) {
+    if ((data1 === NEXT_PREV_TRACK_BUTTON || data1 === NEXT_PREV_TRACK_BUTTON_SHIFT) && data2 > 0 && !isAuxShiftPushed) {
+        cursorTrack.selectNext();
+        trackBank.scrollForwards();
+        return true;
+    } else if ((data1 === NEXT_PREV_TRACK_BUTTON || data1 === NEXT_PREV_TRACK_BUTTON_SHIFT) && data2 > 0 && isAuxShiftPushed) {
+        cursorTrack.selectPrevious();
+        trackBank.scrollBackwards();
+        return true;
+    } else if ((data1 === NEXT_PREV_DEVICE_BUTTON || data1 === NEXT_PREV_TRACK_BUTTON_SHIFT) && data2 > 0 && !isAuxShiftPushed) {
+        cursorDevice.selectNext();
+        return true;
+    } else if ((data1 === NEXT_PREV_DEVICE_BUTTON || data1 === NEXT_PREV_TRACK_BUTTON_SHIFT) && data2 > 0 && isAuxShiftPushed) {
+        cursorDevice.selectPrevious();
+        return true;
+    }
+    return false;
+}
+
+function handleApplication(status, data1, data2) {
+    if (!isAuxShiftPushed) {
+        if (data1 === UNDO_BUTTON && data2 > 0) {
+            application.undo();
+            return true;
+        } else if (data1 === UNDO_BUTTON_SHIFT && data2 > 0) {
+            application.redo();
+            return true;
+        }
+    }
+    return false;
+}
+
+
 function notesInit(noteTable, scale) {
 
     for (let i = 0; i < 128; i++) {
         let n = (i % 12);
-        println(i + "=>" + n);
+        //println(i + "=>" + n);
         if (scale.indexOf(n) != -1)
             noteTable.push(i)
         else

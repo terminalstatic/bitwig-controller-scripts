@@ -106,7 +106,6 @@ if (host.platformIsWindows()) {
     ["Traktor Kontrol F1 - 1"],
     ["Traktor Kontrol F1 - 1"]
   );
-
 }
 
 let lastScenePressed;
