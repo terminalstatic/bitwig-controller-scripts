@@ -3,31 +3,25 @@ loadAPI(16);
 const LOWEST_CC = 1;
 const HIGHEST_CC = 119;
 
-const DEVICE_START_CC = 24;
-const DEVICE_END_CC = 31;
+const DEVICE_START_CC = 16;
+const DEVICE_END_CC = 23;
 
 host.setShouldFailOnDeprecatedUse(true);
 
 host.defineController(
-  "M-Audio",
-  "X-Session UC-17",
-  "0.2",
-  "c128c3b9-6aa7-4adb-831e-725aefdf92a0",
+  "Faderfox",
+  "Faderfox EC4 Devices",
+  "0.1",
+  "0E5D5AE3-0649-4950-A3F4-31332A9E0DA0",
   "terminal_static"
 );
 
 host.defineMidiPorts(1, 1);
 
-if (host.platformIsWindows()) {
-  host.addDeviceNameBasedDiscoveryPair(
-    ["EV-XS USB MIDI Controlle In [1]"],
-    ["EV-XS USB MIDI Controll Out [1]"]);
-} else {
-  host.addDeviceNameBasedDiscoveryPair(
-    ["EV-XS USB MIDI Controller Port 1"],
-    ["EV-XS USB MIDI Controller Port 1"]
-  );
-}
+host.addDeviceNameBasedDiscoveryPair(
+  ["Faderfox EC4"],
+  ["Faderfox EC4"]
+);
 
 var trackSelected = 0;
 var slotSelected = 0;
@@ -38,9 +32,9 @@ function init() {
   transport = host.createTransport();
 
   app = host.createApplication();
-  cursorTrack = host.createCursorTrack('x-session-cursor-track', 'Cursor Track', 0, 0, true);
+  cursorTrack = host.createCursorTrack('x-session-cursor-track', 'Cursor Track', 6, 0, true);
 
-  trackBank = host.createTrackBank(8, 0, 128);
+  trackBank = host.createTrackBank(128, 0, 128);
   trackBank.followCursorTrack(cursorTrack);
 
   trackBank.cursorIndex().markInterested();
@@ -50,9 +44,9 @@ function init() {
 
   /*trackBank.channelCount().addValueObserver((count) => {
     println(`Track count: ${count}`);
-  });
+  });*/
 
-  trackBank.channelScrollPosition().addValueObserver((position) => {
+  /*trackBank.channelScrollPosition().addValueObserver((position) => {
     println(`Track position: ${position}`);
   });*/
 
@@ -63,6 +57,7 @@ function init() {
   for (let t = 0; t < trackBank.getSizeOfBank(); t++) {
     let track = trackBank.getItemAt(t);
 
+
     clipLauncherSlotBank = track.clipLauncherSlotBank();
     clipLauncherSlotBank.setIndication(true);
 
@@ -71,7 +66,7 @@ function init() {
 
       clipSlot.isSelected().addValueObserver(function (isSelected) {
         if (isSelected) {
-          //println("Clip selected in track " + t + ", slot " + s);
+          println("Clip selected in track " + t + ", slot " + s);
           trackSelected = t;
           slotSelected = s;
         }
@@ -79,8 +74,10 @@ function init() {
     }
   }
 
+
   cursorDevice = cursorTrack.createCursorDevice();
   remoteControls = cursorDevice.createCursorRemoteControlsPage(8);
+
 
   for (let i = 0; i < 8; i++) {
     let p = remoteControls.getParameter(i).getAmount();
@@ -88,12 +85,12 @@ function init() {
     p.setLabel("P" + (i + 1));
   }
 
-  // Freely mappable
+
   userControls = host.createUserControls(HIGHEST_CC - LOWEST_CC + 1 - 8);
 
   for (let i = LOWEST_CC; i < HIGHEST_CC; i++) {
     if (!isInDeviceParametersRange(i)) {
-      let index = userControlIndexFromCC(i);
+      let index = userIndexFromCC(i);
       userControls.getControl(index).setIndication(true);
       userControls.getControl(index).setLabel("CC" + i);
     }
@@ -106,55 +103,75 @@ function isInDeviceParametersRange(cc) {
   return cc >= DEVICE_START_CC && cc <= DEVICE_END_CC;
 }
 
-function userControlIndexFromCC(cc) {
+function userIndexFromCC(cc) {
   if (cc > DEVICE_END_CC) {
     return cc - LOWEST_CC - 8;
   }
+
   return cc - LOWEST_CC;
 }
 
 function onMidi(status, data1, data2) {
-  //printMidi(status, data1, data2);
+  printMidi(status, data1, data2);
   //println(MIDIChannel(status));
 
   if (isChannelController(status))
-    if (data1 == 10 && data2 > 0) {
+    if (data1 == 24) {
       cursorTrack.volume().set(data2, 128);
-    } else if (data1 == 32 && data2 > 0) {
+    }
+    else if (data1 == 36 && data2 > 0) {
+      cursorTrack.volume().reset();
+    }
+    else if (data1 == 25) {
+      cursorTrack.pan().set(data2, 128);
+    } else if (data1 == 37 && data2 > 0) {
+      cursorTrack.pan().reset();
+    } else if ((data1 >= 26 && data1 <= 27) || (data1 >= 28 && data1 <= 31)) {
+      cursorTrack.sendBank().getItemAt(data1 - 26).set(data2, 128);
+    }
+    else if (data1 == 32 && data2 > 0) {
       transport.play();
     }
     else if (data1 == 33 && data2 > 0) {
       transport.stop();
+    }
+    else if (data1 == 34 && data2 > 0) {
       transport.rewind();
     }
-    // Maybe add this later
-    /*else if (data1 == 34 && data2 > 0) {
-      transport.isClipLauncherOverdubEnabled().toggle();
-    }*/
-    /*else if (data1 == 33 && data2 > 0) {
-      println("toggle automation write");
-      transport.isClipLauncherAutomationWriteEnabled().toggle();
-    }*/
-    else if (data1 == 34 && data2 > 0) {
+    else if (data1 == 35 && data2 > 0) {
       //println(`Recording on track ${trackSelected}, slot ${slotSelected}`);
       const csb = trackBank.getItemAt(trackSelected).clipLauncherSlotBank();
       csb.record(slotSelected);
       csb.launch(slotSelected);
     }
-    else if (data1 == 35 && data2 > 0) {
+    else if (data1 == 40 && data2 > 0) {
       cursorTrack.selectPrevious();
-    } else if (data1 == 37 && data2 > 0) {
+    } else if (data1 == 41 && data2 > 0) {
       cursorTrack.selectNext();
-    } else if (data1 == 36 && data2 > 0) {
-      app.undo();
+    } else if (data1 == 45 && data2 > 0) {
+      const slotBank = trackBank.getItemAt(trackSelected).clipLauncherSlotBank();
+      const nextIndex = slotSelected + 1;
+      if (nextIndex < slotBank.getSizeOfBank()) {
+        slotBank.select(nextIndex);
+      }
+    } else if (data1 == 44 && data2 > 0) {
+      const slotBank = trackBank.getItemAt(trackSelected).clipLauncherSlotBank();
+      const prevIndex = slotSelected - 1;
+      if (prevIndex >= 0 ) {
+        slotBank.select(prevIndex);
+      }
     } else if (data1 == 38 && data2 > 0) {
       cursorDevice.selectPrevious();
     } else if (data1 == 39 && data2 > 0) {
-      app.redo();
-    } else if (data1 == 40 && data2 > 0) {
       cursorDevice.selectNext();
-    } else if (data1 == 41 && data2 > 0) {
+    } else if (data1 == 46 && data2 > 0) {
+      app.undo();
+    } else if (data1 == 47 && data2 > 0) {
+      app.redo();
+    } else if (data1 == 42 && data2 > 0) {
       remoteControls.selectNextPage(true);
+    } else if (data1 == 43 && data2 > 0) {
+      remoteControls.selectPreviousPage(true);
     } else if (isInDeviceParametersRange(data1)) {
       let index = data1 - DEVICE_START_CC;
       remoteControls
@@ -169,7 +186,7 @@ function onMidi(status, data1, data2) {
 }
 
 function flush() {
-  // TODO: Flush any output to your controller here.
+  // Flush any output to controller here.
 }
 
 function exit() { }
