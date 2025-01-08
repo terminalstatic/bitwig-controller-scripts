@@ -52,6 +52,11 @@ function init() {
 
   trackBank.cursorIndex().addValueObserver((index) => {
     trackSelected = index;
+    //host.println("Track selected: " + trackSelected);
+    if (trackSelected >= 0) {
+      const slotBank = trackBank.getItemAt(trackSelected).clipLauncherSlotBank();
+      slotBank.select(slotSelected);
+    }
   });
 
   for (let t = 0; t < trackBank.getSizeOfBank(); t++) {
@@ -66,7 +71,7 @@ function init() {
 
       clipSlot.isSelected().addValueObserver(function (isSelected) {
         if (isSelected) {
-          println("Clip selected in track " + t + ", slot " + s);
+          //println("Clip selected in track " + t + ", slot " + s);
           trackSelected = t;
           slotSelected = s;
         }
@@ -112,7 +117,7 @@ function userIndexFromCC(cc) {
 }
 
 function onMidi(status, data1, data2) {
-  printMidi(status, data1, data2);
+  //printMidi(status, data1, data2);
   //println(MIDIChannel(status));
 
   if (isChannelController(status))
