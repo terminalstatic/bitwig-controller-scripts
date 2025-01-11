@@ -25,14 +25,23 @@ host.addDeviceNameBasedDiscoveryPair(
 
 var trackSelected = 0;
 var slotSelected = 0;
-
+var surfaceChannel = 16;
 function init() {
+
+  const documentState = host.getDocumentState();
+  const preferences = host.getPreferences();
+  const surfaceChannelEnum = preferences.getEnumSetting("MIDI Channel", "MIDI Channel", ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"], "16");
+
+  surfaceChannelEnum.addValueObserver(function (value) {
+    surfaceChannel = value;
+  });
+
   host.getMidiInPort(0).setMidiCallback(onMidi);
 
   transport = host.createTransport();
 
   app = host.createApplication();
-  cursorTrack = host.createCursorTrack('x-session-cursor-track', 'Cursor Track', 6, 0, true);
+  cursorTrack = host.createCursorTrack('ec-4-cursor-track', 'Cursor Track', 6, 0, true);
 
   trackBank = host.createTrackBank(128, 0, 128);
   trackBank.followCursorTrack(cursorTrack);
@@ -101,7 +110,7 @@ function init() {
     }
   }
 
-  println("x-session initialized!");
+  println("ec4 initialized!");
 }
 
 function isInDeviceParametersRange(cc) {
@@ -119,8 +128,11 @@ function userIndexFromCC(cc) {
 function onMidi(status, data1, data2) {
   //printMidi(status, data1, data2);
   //println(MIDIChannel(status));
+  const channel = (status & 0x0F) + 1;
+  println(`Channel: ${channel}`);
+  println(`Surface channel: ${surfaceChannel}`);
 
-  if (isChannelController(status))
+  if (channel == surfaceChannel) {
     if (data1 == 24) {
       cursorTrack.volume().set(data2, 128);
     }
@@ -162,7 +174,7 @@ function onMidi(status, data1, data2) {
     } else if (data1 == 44 && data2 > 0) {
       const slotBank = trackBank.getItemAt(trackSelected).clipLauncherSlotBank();
       const prevIndex = slotSelected - 1;
-      if (prevIndex >= 0 ) {
+      if (prevIndex >= 0) {
         slotBank.select(prevIndex);
       }
     } else if (data1 == 38 && data2 > 0) {
@@ -188,6 +200,7 @@ function onMidi(status, data1, data2) {
       let index = data1 - LOWEST_CC + HIGHEST_CC * MIDIChannel(status);
       userControls.getControl(index).set(data2, 128);
     }
+  }
 }
 
 function flush() {
