@@ -1,5 +1,9 @@
 loadAPI(16);
 
+load('ec4_lib/ec4_globals.js');
+load('ec4_lib/ec4_sysex.js');
+load('ec4_lib/ec4_midi.js');
+
 host.defineController(
     "Faderfox",
     "Faderfox EC4 Sysex",
@@ -15,55 +19,116 @@ host.addDeviceNameBasedDiscoveryPair(
     ["Faderfox EC4"]
 );
 
-const BUTTON_LABELS = [
-    ['PCLP', 'NCLP', 'UNDO', 'REDO'],
-    ['PTRK', 'NTRK', 'PPAG', 'NPAG'],
-    ['    ', '    ', 'PDEV', 'NDEV'],
-    ['PLAY', 'STOP', 'REWI', 'RCLP'],
-];
-
-let dialLabels = [
-    ['PRM1', 'PRM2', 'PRM3', 'PRM4'],
-    ['PRM5', 'PRM6', 'PRM7', 'PRM8'],
-    ['VOL ', 'PAN ', 'SND1', 'SND2'],
-    ['SND3', 'SND4', 'SND5', 'SND6'],
-];
-
-const SYSEX_HEADER = "F0 00 00 00 4E 2C 1B";
-const CONTROL_DISPLAY = "4E 22 10";
-const TOTAL_DISPLAY = "4E 22 13";
-const SHOW_TOTAL_DISPLAY = "4E 22 14";
-const HIDE_TOTAL_DISPLAY = "4E 22 15";
-const POSITION = "4A";
-const CHAR = "4D";
-const END_SYSEX = "F7";
-
-let setupOffset = 14-1;
-let groupOffset = 3-1;
-
-const SETUP = `4e 28 ${(0x10 + setupOffset).toString(16)}`;
-const GROUP = `4e 24 ${(0x10 + groupOffset).toString(16)}`;
-
-let cursorTrack;
-let cursorDevice;
-let remoteControls;
-
-let midiOut;
-let mode = 0;
 
 function init() {
+    const preferences = host.getPreferences();
+    const ec4MidiChannel = preferences.getEnumSetting("MIDI Channel", "MIDI Channel", ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"], "16");
+    const ec4Setup = preferences.getEnumSetting("Faderfox Setup", "Faderfox Setup", ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"], "14");
+    const ec4Group = preferences.getEnumSetting("Faderfox Group", "Faderfox Group", ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"], "3");
 
-    cursorTrack = host.createCursorTrack('ec-4-cursor-track', 'Cursor Track', 0, 0, true);
-    cursorDevice = cursorTrack.createCursorDevice();
-    remoteControls = cursorDevice.createCursorRemoteControlsPage(8);
+
+    ec4MidiChannel.addValueObserver(function (value) {
+        midiChannel = value;
+    });
+
+    ec4Setup.addValueObserver(function (value) {
+        setupOffset = parseInt(value) - 1;
+        println(`Setup offset: ${setupOffset}`);
+        setup = (0x10 + setupOffset).toString(16);
+    });
+
+    ec4Group.addValueObserver(function (value) {
+        groupOffset = parseInt(value) - 1;
+        println(`Group offset: ${groupOffset}`);
+        group = (0x10 + groupOffset).toString(16);
+    });
 
     host.getMidiInPort(0).setSysexCallback(onSysex);
     host.getMidiInPort(0).setMidiCallback(onMidi);
 
     midiOut = host.getMidiOutPort(0);
 
+    //set to configured setup and group
+    sendSysex(`${SYSEX_HEADER} 4E 28 1d 4E 24 12 ${END_SYSEX}`);
+    currentSetup = '1d';
+    currentGroup = '12';
+
+    // controls init start
+    transport = host.createTransport();
+
+    app = host.createApplication();
+    cursorTrack = host.createCursorTrack('ec-4-cursor-track', 'Cursor Track', 6, 0, true);
+
+    trackBank = host.createTrackBank(128, 0, 128);
+    trackBank.followCursorTrack(cursorTrack);
+
+    trackBank.cursorIndex().markInterested();
+    trackBank.itemCount().markInterested();
+    trackBank.channelCount().markInterested();
+    trackBank.channelScrollPosition().markInterested();
+
+    /*trackBank.channelCount().addValueObserver((count) => {
+      println(`Track count: ${count}`);
+    });*/
+
+    /*trackBank.channelScrollPosition().addValueObserver((position) => {
+      println(`Track position: ${position}`);
+    });*/
+
+    trackBank.cursorIndex().addValueObserver((index) => {
+        trackSelected = index;
+        //host.println("Track selected: " + trackSelected);
+        if (trackSelected >= 0) {
+            const slotBank = trackBank.getItemAt(trackSelected).clipLauncherSlotBank();
+            slotBank.select(slotSelected);
+        }
+    });
+
+    for (let t = 0; t < trackBank.getSizeOfBank(); t++) {
+        let track = trackBank.getItemAt(t);
+
+
+        clipLauncherSlotBank = track.clipLauncherSlotBank();
+        clipLauncherSlotBank.setIndication(true);
+
+        for (let s = 0; s < clipLauncherSlotBank.getSizeOfBank(); s++) {
+            let clipSlot = clipLauncherSlotBank.getItemAt(s);
+
+            clipSlot.isSelected().addValueObserver(function (isSelected) {
+                if (isSelected) {
+                    //println("Clip selected in track " + t + ", slot " + s);
+                    trackSelected = t;
+                    slotSelected = s;
+                }
+            });
+        }
+    }
+
+
+    cursorDevice = cursorTrack.createCursorDevice();
+    remoteControls = cursorDevice.createCursorRemoteControlsPage(8);
+
+
+    for (let i = 0; i < 8; i++) {
+        let p = remoteControls.getParameter(i).getAmount();
+        p.setIndication(true);
+        p.setLabel("P" + (i + 1));
+    }
+
+
+    userControls = host.createUserControls(HIGHEST_CC - LOWEST_CC + 1 - 8);
+
+    for (let i = LOWEST_CC; i < HIGHEST_CC; i++) {
+        if (!isInDeviceParametersRange(i)) {
+            let index = userIndexFromCC(i);
+            userControls.getControl(index).setIndication(true);
+            userControls.getControl(index).setLabel("CC" + i);
+        }
+    }
+
+    // controls init end
     const showTotal = `${SYSEX_HEADER} ${SHOW_TOTAL_DISPLAY} ${END_SYSEX}`;
-    //midiOut.sendSysex("F0 00 00 00 4E 2C 1B 4E 22 13 4A 21 1C 4D 25 12 4D 26 15 4D 27 13 4D 26 1F 4E 22 14 F7");
+
     midiOut.sendSysex(showTotal);
     writeText(' '.repeat(80), 0, 3);
     writeText("Hello Human!", 24, 3);
@@ -74,7 +139,8 @@ function init() {
     }, 3000);
 
 
-    writeText(dialLabels.map(row => row.join('')).join(''), 0);
+    //sendSysex(SETUP_GROUP_STATUS);
+
     for (let i = 0; i < 8; i++) {
         let p = remoteControls.getParameter(i).getAmount();
         p.setIndication(true);
@@ -89,7 +155,9 @@ function init() {
             println(chompedVal);
             println('-----------');
             dialLabels[parseInt(i / 4)][i % 4] = chompedVal;
-            writeText(chompedVal, i * 4);
+            if (mode === 0) {
+                writeText(dialLabels.map(row => row.join('')).join(''), 0);
+            }
         });
         //let name = p.name().get();
         //println("Parameter " + (i + 1) + " name: " + name);
@@ -98,6 +166,8 @@ function init() {
 
     const identityRequest = "F0 7E 7F 06 01 F7"
     midiOut.sendSysex(identityRequest);
+
+    println("ec4 initialized!");
 }
 
 function sendSysex(data) {
@@ -136,47 +206,4 @@ function writeText(text, offset, screen = 0) {
     const request = `${SYSEX_HEADER} ${display} ${pos} ${output} ${END_SYSEX}`;
     println(`Request: ${request}`);
     midiOut.sendSysex(request);
-}
-
-function onSysex(data) {
-    println("Sysex received");
-    println(data);
-    const groupedData = data.match(/.{1,2}/g).join(' ');
-    println(groupedData);
-
-    const setupCHannel = `${SETUP} ${GROUP} ${END_SYSEX.toLowerCase()}`;
-    println(setupCHannel);
-
-    const isShiftDown = data == 'f00000004e2c1b4e26114e2e11f7';
-    if (isShiftDown || groupedData.endsWith(setupCHannel)) {
-        println("Shift down");
-        if (isShiftDown) {
-            mode == 0 ? mode = 1 : mode = 0;
-        }
-
-        let page;
-        switch (mode) {
-            case 0:
-                page = dialLabels.map(row => row.join('')).join('');
-                writeText(page, 0);
-                break;
-            case 1:
-                page = BUTTON_LABELS.map(row => row.join('')).join('');
-                writeText(page, 0);
-                break;
-        }
-    }
-    /*else if (data == 'f00000004e2c1b4e26114e2e10f7') {
-        println(dialLabels);
-        const page = dialLabels.map(row => row.join('')).join('');
-        writeText(page, 0);
-        println("Shift up");
-    }*/
-}
-
-function onMidi(status, data1, data2) {
-    println("Midi received");
-    println(status);
-    println(data1);
-    println(data2);
 }
