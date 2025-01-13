@@ -28,7 +28,22 @@ function onMidi(status, data1, data2) {
             cursorTrack.pan().reset();
         } else if ((data1 >= 26 && data1 <= 27) || (data1 >= 28 && data1 <= 31)) {
             cursorTrack.sendBank().getItemAt(data1 - 26).set(data2, 128);
-        } else if (isInDeviceParametersRange(data1)) {
+        } else if (mode === 0 && data1 >= 38 && data1 <= 39 && data2 > 0) {
+            println("Reset send 1");
+            cursorTrack.sendBank().getItemAt(data1 - 38).reset();
+        } else if (mode === 0 && data1 >= 32 && data1 <= 35 && data2 > 0) {
+            println("Reset send 2");
+            cursorTrack.sendBank().getItemAt(data1 + 2 - 32).reset();
+        }
+        else if (mode === 0 && data1 >= 44 && data1 <= 47 && data2 > 0) {
+            println("Reset remote 1");
+            remoteControls.getParameter(data1 - 44).reset();
+        }
+        else if (mode === 0 && data1 >= 40 && data1 <= 43 && data2 > 0) {
+            println("Reset remote 1");
+            remoteControls.getParameter(data1 + 4 - 40).reset();
+        }
+        else if (isInDeviceParametersRange(data1)) {
             let index = data1 - DEVICE_START_CC;
             remoteControls
                 .getParameter(index)
