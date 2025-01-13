@@ -49,9 +49,10 @@ function init() {
     midiOut = host.getMidiOutPort(0);
 
     //set to configured setup and group
-    sendSysex(`${SYSEX_HEADER} 4E 28 1d 4E 24 12 ${END_SYSEX}`);
-    currentSetup = '1d';
-    currentGroup = '12';
+    currentSetup = (0x10 + parseInt(ec4Setup.get() - 1)).toString(16);
+    currentGroup = (0x10 + parseInt(ec4Group.get() - 1)).toString(16);
+
+    sendSysex(`${SYSEX_HEADER} 4E 28 ${currentSetup} 4E 24 ${currentGroup} ${END_SYSEX}`);
 
     // controls init start
     transport = host.createTransport();
