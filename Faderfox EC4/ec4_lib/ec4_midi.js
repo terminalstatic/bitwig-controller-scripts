@@ -2,14 +2,6 @@ function isInDeviceParametersRange(cc) {
     return cc >= DEVICE_START_CC && cc <= DEVICE_END_CC;
 }
 
-function userIndexFromCC(cc) {
-    if (cc > DEVICE_END_CC) {
-        return cc - LOWEST_CC - 8;
-    }
-
-    return cc - LOWEST_CC;
-}
-
 function onMidi(status, data1, data2) {
     printMidi(status, data1, data2);
     //println(MIDIChannel(status));

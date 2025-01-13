@@ -116,17 +116,6 @@ function init() {
         p.setLabel("P" + (i + 1));
     }
 
-
-    userControls = host.createUserControls(HIGHEST_CC - LOWEST_CC + 1 - 8);
-
-    for (let i = LOWEST_CC; i < HIGHEST_CC; i++) {
-        if (!isInDeviceParametersRange(i)) {
-            let index = userIndexFromCC(i);
-            userControls.getControl(index).setIndication(true);
-            userControls.getControl(index).setLabel("CC" + i);
-        }
-    }
-
     // controls init end
     const showTotal = `${SYSEX_HEADER} ${SHOW_TOTAL_DISPLAY} ${END_SYSEX}`;
 
