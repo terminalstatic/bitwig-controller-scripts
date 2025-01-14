@@ -28,9 +28,6 @@ var slotSelected = 0;
 var surfaceChannel = 16;
 function init() {
 
-  const document = host.getDocumentState();
-  document.getEnumSetting("Midi Channel", "MIDI Channel", ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"], "16");
-
   const preferences = host.getPreferences();
   const surfaceChannelEnum = preferences.getEnumSetting("MIDI Channel", "MIDI Channel", ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"], "16");
 
