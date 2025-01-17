@@ -33,13 +33,11 @@ function init() {
 
     ec4Setup.addValueObserver(function (value) {
         setupOffset = parseInt(value) - 1;
-        println(`Setup offset: ${setupOffset}`);
         setup = (0x10 + setupOffset).toString(16);
     });
 
     ec4Group.addValueObserver(function (value) {
         groupOffset = parseInt(value) - 1;
-        println(`Group offset: ${groupOffset}`);
         group = (0x10 + groupOffset).toString(16);
     });
 
@@ -78,7 +76,6 @@ function init() {
 
     trackBank.cursorIndex().addValueObserver((index) => {
         trackSelected = index;
-        //host.println("Track selected: " + trackSelected);
         if (trackSelected >= 0) {
             const slotBank = trackBank.getItemAt(trackSelected).clipLauncherSlotBank();
             slotBank.select(slotSelected);
@@ -97,7 +94,6 @@ function init() {
 
             clipSlot.isSelected().addValueObserver(function (isSelected) {
                 if (isSelected) {
-                    //println("Clip selected in track " + t + ", slot " + s);
                     trackSelected = t;
                     slotSelected = s;
                 }
@@ -128,7 +124,6 @@ function init() {
         midiOut.sendSysex(hideTotal);
     }, 3000);
 
-
     //sendSysex(SETUP_GROUP_STATUS);
 
     for (let i = 0; i < 8; i++) {
@@ -136,21 +131,16 @@ function init() {
         p.setIndication(true);
         p.name().markInterested();
         p.name().addValueObserver((value) => {
-            println("Parameter " + (i + 1) + " value: " + value);
             let chompedVal = value.split(' ');
             chompedVal = chompedVal.length > 1 ? `${chompedVal[0][0]}${chompedVal[1].substring(0, 3)}` : chompedVal[0];
 
             chompedVal = chompedVal.length >= 4 ? chompedVal.substring(0, 4) : chompedVal.padEnd(4, ' ');
-            println('-----------');
-            println(chompedVal);
-            println('-----------');
+
             dialLabels[parseInt(i / 4)][i % 4] = chompedVal;
             if (mode === 0) {
                 writeText(dialLabels.map(row => row.join('')).join(''), 0);
             }
         });
-        //let name = p.name().get();
-        //println("Parameter " + (i + 1) + " name: " + name);
         p.setLabel("P" + (i + 1));
     }
 
@@ -176,7 +166,6 @@ function writeText(text, offset, screen = 0) {
     }
 
     const output = charsMap.join(' ');
-    println(`Output: ${output}`);
 
     const msb = 0x20 + parseInt(offset / 16);
     const lsb = 0x10 + (offset % 16);
@@ -194,6 +183,6 @@ function writeText(text, offset, screen = 0) {
     }
 
     const request = `${SYSEX_HEADER} ${display} ${pos} ${output} ${END_SYSEX}`;
-    println(`Request: ${request}`);
+
     midiOut.sendSysex(request);
 }

@@ -1,7 +1,7 @@
 const BUTTON_LABELS = [
     ['PCLP', 'NCLP', 'UNDO', 'REDO'],
     ['PTRK', 'NTRK', 'PPAG', 'NPAG'],
-    ['    ', '    ', 'PDEV', 'NDEV'],
+    ['MUTE', 'SOLO', 'PDEV', 'NDEV'],
     ['PLAY', 'STOP', 'REWI', 'RCLP'],
 ];
 
@@ -48,7 +48,7 @@ let remoteControls;
 let clipLauncherSlotBank;
 
 let midiOut;
-let mode = 0;
+let mode = 1;
 
 var trackSelected = 0;
 var slotSelected = 0;
