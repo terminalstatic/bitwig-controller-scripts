@@ -1,3 +1,5 @@
+let alt = false;
+
 function handleSetupGroupResponse(groupedData) {
     const hexes = groupedData.split(' ');
     if (hexes.length === 14) {
@@ -16,12 +18,28 @@ function onSysex(data) {
     const setupGroup = `4e 28 ${setup} 4e 24 ${group} ${END_SYSEX.toLowerCase()}`;
 
     const isShiftDown = data === 'f00000004e2c1b4e26114e2e11f7';
+    const isShiftUp = data === 'f00000004e2c1b4e26114e2e10f7';
+
     const isInSetupAndGroup = currentSetup === setup && currentGroup === group;
 
-    if ((isShiftDown  && isInSetupAndGroup) ||
+    if (isShiftDown) {
+        alt = true;
+    }
+
+    if (alt === true) {
+        if (SHIFT_BUTTONS_DOWN.includes(data)) {
+            transport.toggleWriteClipLauncherAutomation();
+        } else if (SHIFT_BUTTONS_UP.includes(data)) {
+            alt = false;
+        }
+    }
+
+    if ((isShiftUp  && isInSetupAndGroup) ||
             groupedData.endsWith(setupGroup)) {
-        if (isShiftDown) {
+            alt = false;
+        if (isShiftUp) {
             mode === 0 ? mode = 1 : mode = 0;
+            alt = false;
             println(`Mode set to ${mode}`);
         }
 

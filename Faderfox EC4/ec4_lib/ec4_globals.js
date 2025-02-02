@@ -1,3 +1,41 @@
+const SHIFT_BUTTONS_UP = [
+    'f00000004e2c1b4e2a104e2e10f7',
+    'f00000004e2c1b4e2a114e2e10f7',
+    'f00000004e2c1b4e2a124e2e10f7',
+    'f00000004e2c1b4e2a134e2e10f7',
+    'f00000004e2c1b4e2a144e2e10f7',
+    'f00000004e2c1b4e2a154e2e10f7',
+    'f00000004e2c1b4e2a164e2e10f7',
+    'f00000004e2c1b4e2a174e2e10f7',
+    'f00000004e2c1b4e2a184e2e10f7',
+    'f00000004e2c1b4e2a194e2e10f7',
+    'f00000004e2c1b4e2a1a4e2e10f7',
+    'f00000004e2c1b4e2a1b4e2e10f7',
+    'f00000004e2c1b4e2a1c4e2e10f7',
+    'f00000004e2c1b4e2a1d4e2e10f7',
+    'f00000004e2c1b4e2a1e4e2e10f7',
+    'f00000004e2c1b4e2a1f4e2e10f7'
+];
+
+const SHIFT_BUTTONS_DOWN = [
+    'f00000004e2c1b4e2a104e2e11f7',
+    'f00000004e2c1b4e2a114e2e11f7',
+    'f00000004e2c1b4e2a124e2e11f7',
+    'f00000004e2c1b4e2a134e2e11f7',
+    'f00000004e2c1b4e2a144e2e11f7',
+    'f00000004e2c1b4e2a154e2e11f7',
+    'f00000004e2c1b4e2a164e2e11f7',
+    'f00000004e2c1b4e2a174e2e11f7',
+    'f00000004e2c1b4e2a184e2e11f7',
+    'f00000004e2c1b4e2a194e2e11f7',
+    'f00000004e2c1b4e2a1a4e2e11f7',
+    'f00000004e2c1b4e2a1b4e2e11f7',
+    'f00000004e2c1b4e2a1c4e2e11f7',
+    'f00000004e2c1b4e2a1d4e2e11f7',
+    'f00000004e2c1b4e2a1e4e2e11f7',
+    'f00000004e2c1b4e2a1f4e2e11f7'
+];
+
 const BUTTON_LABELS = [
     ['PCLP', 'NCLP', 'UNDO', 'REDO'],
     ['PTRK', 'NTRK', 'PPAG', 'NPAG'],

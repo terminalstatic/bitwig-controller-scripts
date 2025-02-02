@@ -132,7 +132,19 @@ function init() {
         p.name().markInterested();
         p.name().addValueObserver((value) => {
             let chompedVal = value.split(' ');
-            chompedVal = chompedVal.length > 1 ? `${chompedVal[0][0]}${chompedVal[1].substring(0, 3)}` : chompedVal[0];
+
+            if (chompedVal.length > 1) {
+                if (chompedVal[0].length > chompedVal[1].length) {
+                    const l = chompedVal[0].length > 3 ? 3 : chompedVal[0].length;
+                    chompedVal = `${chompedVal[0].substring(0, l)}${chompedVal[1][0]}`;
+                }
+                else if (chompedVal[0].length <= chompedVal[1].length) {
+                    const l = chompedVal[1].length > 3 ? 3 : chompedVal[1].length;
+                    chompedVal = `${chompedVal[0][0]}${chompedVal[1].substring(0, l)}`;
+                }
+            } else {
+                chompedVal = chompedVal[0];
+            }
 
             chompedVal = chompedVal.length >= 4 ? chompedVal.substring(0, 4) : chompedVal.padEnd(4, ' ');
 

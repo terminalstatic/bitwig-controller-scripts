@@ -5,6 +5,7 @@ function isInDeviceParametersRange(cc) {
 function onMidi(status, data1, data2) {
     printMidi(status, data1, data2);
     //println(MIDIChannel(status));
+
     const channel = (status & 0x0F) + 1;
 
     if (channel == midiChannel) {
@@ -18,7 +19,8 @@ function onMidi(status, data1, data2) {
             cursorTrack.pan().set(data2, 128);
         } else if (data1 == 37 && data2 > 0) {
             cursorTrack.pan().reset();
-        } else if ((data1 >= 26 && data1 <= 27) || (data1 >= 28 && data1 <= 31)) {
+        }
+        else if ((data1 >= 26 && data1 <= 27) || (data1 >= 28 && data1 <= 31)) {
             cursorTrack.sendBank().getItemAt(data1 - 26).set(data2, 128);
         } else if (mode === 0 && data1 >= 38 && data1 <= 39 && data2 > 0) {
             cursorTrack.sendBank().getItemAt(data1 - 38).reset();
@@ -70,10 +72,10 @@ function onMidi(status, data1, data2) {
                 if (prevIndex >= 0) {
                     slotBank.select(prevIndex);
                 }
-            } else if(data1 == 36 && data2 > 0) {
+            } else if (data1 == 36 && data2 > 0) {
                 cursorTrack.mute().toggle();
 
-            } else if(data1 == 37 && data2 > 0) {
+            } else if (data1 == 37 && data2 > 0) {
                 cursorTrack.solo().toggle();
             } else if (data1 == 38 && data2 > 0) {
                 cursorDevice.selectPrevious();
